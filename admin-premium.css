@@ -1,0 +1,291 @@
+/* PINTAO — capa visual premium (admin / dashboard)
+   Aditiva sobre admin.css + admin-brand.css. No reemplaza lógica.
+   Centro de operaciones premium: sidebar con profundidad, KPIs vivos,
+   tablas modernas, modales glass, login cinematográfico. 60fps + reduced-motion. */
+
+:root{
+  --a-bg:#0c0b0a;
+  --a-surface:#16140f;
+  --a-surface-2:#1f1c16;
+  --a-surface-3:#2a251d;
+  --a-line:rgba(255,255,255,.07);
+  --a-line-2:rgba(255,255,255,.12);
+  --a-text:#f5efe6;
+  --a-muted:#9a9080;
+  --a-muted-2:#6f6759;
+  --a-ember:#e2793e;
+  --a-ember-2:#c65a24;
+  --a-ember-glow:rgba(226,121,62,.4);
+  --a-gold:#e9b25e;
+  --a-green:#4caf72;
+  --a-red:#e0584b;
+  --a-amber:#d6a64a;
+  --a-glass:rgba(255,255,255,.04);
+  --a-glass-2:rgba(255,255,255,.07);
+  --a-glass-border:rgba(255,255,255,.08);
+  --a-shadow-sm:0 2px 10px rgba(0,0,0,.3);
+  --a-shadow-md:0 14px 40px rgba(0,0,0,.4);
+  --a-shadow-lg:0 30px 80px rgba(0,0,0,.5);
+  --a-glow:0 0 30px var(--a-ember-glow);
+  --r-xs:8px; --r-sm:12px; --r-md:16px; --r-lg:22px; --r-pill:999px;
+  --a-ease:cubic-bezier(.22,.61,.36,1);
+  --a-spring:cubic-bezier(.34,1.56,.64,1);
+  --a-d1:.16s; --a-d2:.26s; --a-d3:.45s;
+}
+
+/* Fondo atmosférico del panel */
+body.admin-page,body.admin-login-page{
+  background:
+    radial-gradient(120% 100% at 0% 0%, rgba(226,121,62,.10), transparent 40%),
+    radial-gradient(100% 90% at 100% 100%, rgba(233,178,94,.08), transparent 45%),
+    var(--a-bg) !important;
+  color:var(--a-text) !important;
+  position:relative;
+}
+body.admin-page::before,body.admin-login-page::before{
+  content:""; position:fixed; inset:0; z-index:-1; pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity:.025; mix-blend-mode:overlay;
+}
+
+/* ───────── Sidebar con profundidad y nav premium ───────── */
+.sidebar{
+  background:linear-gradient(180deg,var(--a-surface),var(--a-bg)) !important;
+  border-right:1px solid var(--a-line) !important;
+  box-shadow:1px 0 40px rgba(0,0,0,.4);
+  position:relative;
+}
+.sidebar::before{ /* halo ember en la base */
+  content:""; position:absolute; left:-30px; bottom:-30px; width:200px; height:200px;
+  background:radial-gradient(circle,var(--a-ember-glow),transparent 70%); filter:blur(40px); pointer-events:none;
+}
+.admin-logo{color:var(--a-text) !important}
+.admin-logo small{color:var(--a-ember) !important}
+.role-card{border-top:1px solid var(--a-line) !important; border-bottom:1px solid var(--a-line) !important}
+.role-card i{
+  background:linear-gradient(135deg,var(--a-ember),var(--a-ember-2)) !important;
+  box-shadow:0 6px 18px rgba(226,121,62,.45);
+}
+.sidebar nav button{
+  color:var(--a-muted) !important; border-radius:var(--r-sm) !important;
+  transition:all var(--a-d2) var(--a-ease); position:relative;
+}
+.sidebar nav button:hover{background:var(--a-glass) !important; color:var(--a-text) !important; transform:translateX(3px)}
+.sidebar nav button.active{
+  background:linear-gradient(135deg,rgba(226,121,62,.18),rgba(226,121,62,.06)) !important;
+  color:var(--a-text) !important; border:1px solid rgba(226,121,62,.25);
+  box-shadow:inset 0 0 20px rgba(226,121,62,.08);
+}
+.sidebar nav button.active::before{ /* indicador luminoso izquierdo */
+  content:""; position:absolute; left:0; top:18%; bottom:18%; width:3px; border-radius:var(--r-pill);
+  background:linear-gradient(180deg,var(--a-ember),var(--a-gold)); box-shadow:var(--a-glow);
+}
+.store-link,.sidebar-bottom button{color:var(--a-muted) !important; transition:all var(--a-d2) var(--a-ease)}
+.store-link:hover,.sidebar-bottom button:hover{color:var(--a-text) !important}
+
+/* ───────── Header / live indicator ───────── */
+.eyebrow{color:var(--a-ember) !important; background:none !important; -webkit-text-fill-color:var(--a-ember)}
+header h1{color:var(--a-text) !important; letter-spacing:-1px}
+.header-actions button,.card-title button{
+  background:var(--a-glass) !important; border:1px solid var(--a-line) !important; color:var(--a-text) !important;
+  border-radius:var(--r-sm) !important; transition:all var(--a-d2) var(--a-ease);
+}
+.header-actions button:hover,.card-title button:hover{border-color:var(--a-line-2) !important;
+  background:var(--a-glass-2) !important; transform:translateY(-1px)}
+.live{background:rgba(76,175,114,.12) !important; color:var(--a-green) !important;
+  border:1px solid rgba(76,175,114,.25) !important; border-radius:var(--r-pill) !important}
+.live i{background:var(--a-green) !important; box-shadow:0 0 0 0 rgba(76,175,114,.5);
+  animation:pintao-live 2s infinite}
+@keyframes pintao-live{0%{box-shadow:0 0 0 0 rgba(76,175,114,.5)}70%{box-shadow:0 0 0 8px rgba(76,175,114,0)}100%{box-shadow:0 0 0 0 rgba(76,175,114,0)}}
+
+/* ───────── Stats / KPIs premium ───────── */
+.stats article,.chart-card,.quick-card,.table-card,.settings-card,.admin-product{
+  background:var(--a-glass) !important; border:1px solid var(--a-line) !important;
+  border-radius:var(--r-md) !important; color:var(--a-text) !important;
+  -webkit-backdrop-filter:blur(12px); backdrop-filter:blur(12px);
+  box-shadow:var(--a-shadow-sm); transition:all var(--a-d3) var(--a-ease);
+}
+.stats article{position:relative; overflow:hidden}
+.stats article::before{ /* halo esquina */
+  content:""; position:absolute; right:-30px; top:-30px; width:90px; height:90px;
+  background:radial-gradient(circle,var(--a-ember-glow),transparent 70%); filter:blur(20px); opacity:.5;
+  transition:opacity var(--a-d3) var(--a-ease);
+}
+.stats article:hover{transform:translateY(-3px); border-color:var(--a-line-2) !important; box-shadow:var(--a-shadow-md)}
+.stats article:hover::before{opacity:1}
+.stats span,.stats small{color:var(--a-muted) !important}
+.stats strong{
+  color:var(--a-text) !important; font-variant-numeric:tabular-nums;
+  background:linear-gradient(135deg,var(--a-text),var(--a-ember)); -webkit-background-clip:text;
+  background-clip:text; -webkit-text-fill-color:transparent;
+}
+
+/* ───────── Gráfico de barras premium ───────── */
+.bars i{
+  background:linear-gradient(180deg,var(--a-ember),var(--a-ember-2)) !important;
+  border-radius:var(--r-xs) var(--r-xs) 0 0; box-shadow:0 0 12px rgba(226,121,62,.3);
+  transition:height var(--a-d3) var(--a-ease);
+}
+.bars i:after{color:var(--a-muted) !important}
+.chart-card{position:relative}
+
+/* ───────── Quick card premium ───────── */
+.quick-card button,.quick-card a{
+  background:var(--a-glass) !important; border:1px solid var(--a-line) !important; color:var(--a-text) !important;
+  border-radius:var(--r-sm) !important; transition:all var(--a-d2) var(--a-ease);
+}
+.quick-card button:hover,.quick-card a:hover{
+  background:linear-gradient(135deg,var(--a-ember),var(--a-ember-2)) !important;
+  border-color:transparent !important; transform:translateX(4px); box-shadow:var(--a-glow);
+}
+
+/* ───────── Tablas premium ───────── */
+.table-card{overflow:hidden}
+.admin-row{border-top:1px solid var(--a-line) !important; color:var(--a-text) !important;
+  transition:background var(--a-d1) var(--a-ease)}
+.admin-row:hover{background:var(--a-glass) !important}
+.admin-row.header{background:var(--a-glass-2) !important; color:var(--a-muted) !important}
+.admin-empty{color:var(--a-muted) !important}
+.status{border-radius:var(--r-pill) !important; font-weight:600}
+/* Badges semánticos por estado de pedido */
+.status option,.admin-row select{color:var(--a-text) !important}
+.admin-row select{
+  background:var(--a-surface-2) !important; border:1px solid var(--a-line-2) !important;
+  border-radius:var(--r-sm) !important; color:var(--a-text) !important; padding:6px 8px;
+}
+.admin-row select:focus{outline:1px solid var(--a-ember); border-color:var(--a-ember)}
+
+/* ───────── Productos admin premium ───────── */
+.admin-product img{border-radius:var(--r-md) var(--r-md) 0 0}
+.admin-product>div{background:transparent !important}
+.admin-product h3{color:var(--a-text) !important}
+.admin-product p{color:var(--a-muted) !important}
+.admin-product footer{border-top:1px solid var(--a-line) !important}
+.admin-product footer b{color:var(--a-text) !important}
+.admin-product footer button{
+  background:var(--a-glass-2) !important; border:1px solid var(--a-line-2) !important; color:var(--a-text) !important;
+  border-radius:var(--r-xs) !important; transition:all var(--a-d2) var(--a-ease);
+}
+.admin-product footer button:hover{background:var(--a-ember) !important; border-color:transparent !important}
+.admin-product:hover{transform:translateY(-4px); border-color:var(--a-line-2) !important; box-shadow:var(--a-shadow-md)}
+.stock-low{color:var(--a-red) !important}
+
+/* ───────── Inputs / filtros / forms premium ───────── */
+.filter-row input,.filter-row select,.settings-card input,.modal input,.modal textarea{
+  background:var(--a-surface-2) !important; border:1px solid var(--a-line-2) !important;
+  color:var(--a-text) !important; border-radius:var(--r-sm) !important;
+  transition:all var(--a-d2) var(--a-ease);
+}
+.filter-row input::placeholder,.modal input::placeholder{color:var(--a-muted-2) !important}
+.filter-row input:focus,.filter-row select:focus,.settings-card input:focus,.modal input:focus,.modal textarea:focus{
+  border-color:var(--a-ember) !important; box-shadow:0 0 0 3px rgba(226,121,62,.15) !important; outline:none !important;
+}
+.settings-card label,.modal label{color:var(--a-muted) !important}
+.settings-card h2,.modal h2,.section-toolbar h2{color:var(--a-text) !important}
+.section-toolbar p,.card-title span{color:var(--a-muted) !important}
+
+/* ───────── Primary / danger premium ───────── */
+.primary{
+  background:linear-gradient(135deg,var(--a-ember),var(--a-ember-2)) !important; color:#fff !important;
+  border:0 !important; border-radius:var(--r-sm) !important; font-weight:700;
+  box-shadow:0 8px 24px rgba(226,121,62,.35); transition:all var(--a-d2) var(--a-spring);
+  position:relative; overflow:hidden;
+}
+.primary::after{content:""; position:absolute; top:0; left:-120%; width:60%; height:100%;
+  background:linear-gradient(100deg,transparent,rgba(255,255,255,.3),transparent); transform:skewX(-18deg);
+  transition:left .6s var(--a-ease)}
+.primary:hover{transform:translateY(-2px); box-shadow:0 12px 32px rgba(226,121,62,.5)}
+.primary:hover::after{left:140%}
+.primary:active{transform:translateY(0) scale(.98)}
+.danger{background:rgba(224,88,75,.12) !important; border:1px solid rgba(224,88,75,.4) !important;
+  color:var(--a-red) !important; border-radius:var(--r-sm) !important; transition:all var(--a-d2) var(--a-ease)}
+.danger:hover{background:var(--a-red) !important; color:#fff !important}
+
+/* ───────── Empty state admin premium ───────── */
+.empty-state{background:var(--a-glass) !important; border:1px dashed var(--a-line-2) !important;
+  border-radius:var(--r-lg) !important}
+.empty-state strong{color:var(--a-muted) !important}
+.empty-state p{color:var(--a-muted) !important}
+
+/* ───────── Modal glass premium ───────── */
+.modal{background:rgba(8,7,6,.7) !important; -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px)}
+.modal form{
+  background:var(--a-surface) !important; border:1px solid var(--a-glass-border) !important;
+  border-radius:var(--r-lg) !important; box-shadow:var(--a-shadow-lg) !important; color:var(--a-text) !important;
+  animation:pintao-modal-in var(--a-d3) var(--a-spring) both;
+}
+@keyframes pintao-modal-in{from{opacity:0; transform:translateY(20px) scale(.96)}to{opacity:1; transform:none}}
+.modal.open{animation:none}
+.modal .close{color:var(--a-muted) !important; transition:all var(--a-d2) var(--a-ease)}
+.modal .close:hover{color:var(--a-text) !important; transform:rotate(90deg)}
+.modal .two{gap:12px}
+.modal-actions{border-top:1px solid var(--a-line); padding-top:18px}
+
+/* ───────── Toast admin premium ───────── */
+.toast{
+  background:linear-gradient(135deg,var(--a-surface-2),var(--a-surface)) !important;
+  border:1px solid var(--a-glass-border) !important; border-radius:var(--r-pill) !important;
+  box-shadow:var(--a-shadow-lg) !important; color:var(--a-text) !important;
+  -webkit-backdrop-filter:blur(20px); backdrop-filter:blur(20px);
+}
+
+/* ───────── Login cinematográfico premium ───────── */
+.login-shell{position:relative; overflow:hidden}
+.login-brand{
+  background:
+    radial-gradient(circle at 20% 70%, rgba(226,121,62,.4), transparent 38%),
+    radial-gradient(circle at 80% 20%, rgba(233,178,94,.2), transparent 40%),
+    linear-gradient(135deg,#0c0d0e,#241c16) !important;
+}
+.login-brand::before{ /* blob ember animado */
+  content:""; position:absolute; width:400px; height:400px; left:-100px; bottom:-100px;
+  background:radial-gradient(circle,rgba(226,121,62,.3),transparent 60%); filter:blur(60px);
+  animation:pintao-admin-blob 18s var(--a-ease) infinite; pointer-events:none;
+}
+@keyframes pintao-admin-blob{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(60px,-40px) scale(1.15)}}
+.login-brand h1{letter-spacing:-5px; text-shadow:0 20px 60px rgba(0,0,0,.5)}
+.login-brand .eyebrow{color:var(--a-ember) !important}
+.login-panel{background:var(--a-bg) !important; color:var(--a-text) !important; position:relative}
+.login-panel form{
+  background:var(--a-surface) !important; border:1px solid var(--a-glass-border) !important;
+  border-radius:var(--r-lg) !important; box-shadow:var(--a-shadow-lg) !important;
+  border-top:3px solid transparent !important;
+  border-image:linear-gradient(90deg,var(--a-ember),var(--a-gold)) 1 !important;
+  animation:pintao-modal-in .6s var(--a-spring) both;
+}
+.login-panel h2{color:var(--a-text) !important}
+.login-panel label{color:var(--a-muted) !important}
+.login-panel input{background:var(--a-surface-2) !important; border:1px solid var(--a-line-2) !important;
+  color:var(--a-text) !important; border-radius:var(--r-sm) !important}
+.login-panel input:focus{border-color:var(--a-ember) !important; box-shadow:0 0 0 3px rgba(226,121,62,.15) !important}
+.login-panel .primary{width:100% !important}
+.login-panel #loginError{color:var(--a-red) !important}
+
+/* ───────── Skeletons admin ───────── */
+.a-skeleton{position:relative; overflow:hidden; background:var(--a-surface-2); border-radius:var(--r-sm);
+  animation:pintao-a-shimmer 1.4s infinite linear}
+.a-skeleton::after{content:""; position:absolute; inset:0;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.05),transparent); background-size:200% 100%;
+  animation:pintao-a-shimmer 1.4s infinite linear}
+@keyframes pintao-a-shimmer{to{background-position:-200% 0}}
+
+/* ───────── Count-up / entrada KPIs ───────── */
+.stats strong,.bars{animation:pintao-fade-up .5s var(--a-ease) both}
+@keyframes pintao-fade-up{from{opacity:0; transform:translateY(8px)}to{opacity:1; transform:none}}
+
+/* ───────── Responsive admin ───────── */
+@media(max-width:950px){
+  .login-brand::before{display:none}
+}
+@media(max-width:600px){
+  .stats article::before{display:none}
+  .modal form{padding:24px 18px}
+}
+
+/* ───────── Reduced motion ───────── */
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms !important; animation-iteration-count:1 !important;
+    transition-duration:.001ms !important}
+  .login-brand::before,.live i{animation:none !important}
+  .primary::after{display:none}
+}

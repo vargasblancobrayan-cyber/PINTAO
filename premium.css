@@ -1,0 +1,345 @@
+/* PINTAO — capa visual premium (storefront)
+   Aditiva sobre shop.css. No reemplaza estilos funcionales.
+   Principios: SOFISTICACIÓN > CANTIDAD · FLUIDEZ > COMPLEJIDAD · RENDIMIENTO > EFECTOS
+   Solo transform/opacity en animaciones frecuentes; blurs controlados; 60fps objetivo.
+   Soporta prefers-reduced-motion. */
+
+:root{
+  /* Paleta premium — extiende sin romper la identidad PINTAO */
+  --p-ink:#171512;            /* tinta principal (storefront) */
+  --p-ink-2:#241c16;          /* superficie oscura 1 */
+  --p-ink-3:#322620;          /* superficie oscura 2 */
+  --p-paper:#f4ede1;          /* papel cálido */
+  --p-paper-2:#fbf6ee;        /* superficie clara 1 */
+  --p-paper-3:#ffffff;        /* superficie clara 2 */
+  --p-ember:#c65a24;          /* acento marca (terracota) */
+  --p-ember-soft:#e2793e;     /* acento luminoso */
+  --p-ember-glow:rgba(226,121,62,.45);
+  --p-gold:#e9b25e;           /* acento secundario cálido */
+  --p-mist:#7c7468;           /* texto neutro */
+  --p-line:rgba(38,25,13,.12);
+  --p-line-strong:rgba(38,25,13,.22);
+  --p-green:#326748;
+  --p-red:#c0392b;
+  --p-amber:#9b6c00;
+
+  /* Superficies translúcidas (glass digital) */
+  --glass-light:rgba(255,253,247,.62);
+  --glass-light-2:rgba(255,253,247,.46);
+  --glass-dark:rgba(23,21,18,.55);
+  --glass-dark-2:rgba(23,21,18,.42);
+  --glass-border:rgba(255,255,255,.55);
+  --glass-border-dark:rgba(255,255,255,.10);
+
+  /* Profundidad y luz */
+  --shadow-sm:0 2px 10px rgba(38,25,13,.07);
+  --shadow-md:0 14px 34px rgba(38,25,13,.13);
+  --shadow-lg:0 28px 70px rgba(38,25,13,.18);
+  --shadow-xl:0 40px 120px rgba(38,25,13,.24);
+  --glow-ember:0 0 0 1px rgba(198,90,36,.18), 0 14px 40px rgba(198,90,36,.22);
+  --glow-soft:0 0 40px var(--p-ember-glow);
+
+  /* Radios */
+  --r-xs:8px; --r-sm:12px; --r-md:16px; --r-lg:22px; --r-xl:30px; --r-pill:999px;
+
+  /* Movimiento */
+  --ease-out:cubic-bezier(.22,.61,.36,1);
+  --ease-spring:cubic-bezier(.34,1.56,.64,1);
+  --ease-in-out:cubic-bezier(.65,.05,.36,1);
+  --dur-1:.14s; --dur-2:.24s; --dur-3:.42s; --dur-4:.8s;
+
+  /* Capas */
+  --z-ambient:-1; --z-base:0; --z-sticky:30; --z-drawer:80; --z-modal:100; --z-toast:120;
+}
+
+/* ───────── Fondo atmosférico (mesh gradient + aurora + grain) ───────── */
+/* Capa fija detrás de todo; sin JS para el núcleo. Parallax opcional vía premium.js. */
+.pintao-atmosphere{
+  position:fixed; inset:0; z-index:var(--z-ambient); pointer-events:none; overflow:hidden;
+  background:
+    radial-gradient(120% 90% at 12% 8%, rgba(226,121,62,.16), transparent 42%),
+    radial-gradient(110% 80% at 88% 18%, rgba(233,178,94,.13), transparent 46%),
+    radial-gradient(130% 100% at 78% 92%, rgba(198,90,36,.12), transparent 50%),
+    linear-gradient(180deg, var(--p-paper) 0%, #efe6d6 100%);
+}
+.pintao-atmosphere::before{ /* blobs difusos lentos */
+  content:""; position:absolute; width:60vw; height:60vw; left:-12vw; top:-14vw;
+  background:radial-gradient(circle, rgba(226,121,62,.22), transparent 60%);
+  filter:blur(60px); border-radius:50%;
+  animation:pintao-float-a 22s var(--ease-in-out) infinite;
+}
+.pintao-atmosphere::after{
+  content:""; position:absolute; width:55vw; height:55vw; right:-10vw; bottom:-16vw;
+  background:radial-gradient(circle, rgba(233,178,94,.18), transparent 60%);
+  filter:blur(70px); border-radius:50%;
+  animation:pintao-float-b 28s var(--ease-in-out) infinite;
+}
+/* Grain extremadamente sutil para textura premium */
+.pintao-atmosphere>.pintao-grain{
+  position:absolute; inset:0; opacity:.035; mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+@keyframes pintao-float-a{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(8vw,6vw) scale(1.08)}}
+@keyframes pintao-float-b{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-7vw,-5vw) scale(1.06)}}
+
+/* El cuerpo deja ver el fondo atmosférico */
+body{background:transparent !important; position:relative; z-index:var(--z-base);}
+body.drawer-open{overflow:hidden}
+
+/* ───────── Tipografía / jerarquía ───────── */
+.eyebrow{
+  background:linear-gradient(90deg,var(--p-ember),var(--p-gold));
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+  font-weight:800; letter-spacing:2.6px;
+}
+.section-title{letter-spacing:-3px; text-wrap:balance}
+
+/* ───────── Header glass premium ───────── */
+.site-header{
+  background:var(--glass-light) !important;
+  -webkit-backdrop-filter:blur(20px) saturate(140%); backdrop-filter:blur(20px) saturate(140%);
+  border-bottom:1px solid var(--glass-border) !important;
+  box-shadow:0 1px 0 rgba(255,255,255,.5) inset, 0 10px 30px rgba(38,25,13,.06);
+}
+.main-nav a{transition:color var(--dur-2) var(--ease-out)}
+.main-nav a:after{height:2px; background:linear-gradient(90deg,var(--p-ember),var(--p-gold)) !important;
+  border-radius:2px; box-shadow:0 0 12px var(--p-ember-glow)}
+.header-actions .bag-button{
+  border-radius:var(--r-pill) !important; border-color:var(--p-line-strong) !important;
+  background:var(--glass-light-2); transition:all var(--dur-2) var(--ease-out);
+}
+.header-actions .bag-button:hover{transform:translateY(-1px); border-color:var(--p-ember) !important;
+  box-shadow:var(--glow-ember)}
+.cart-count{background:linear-gradient(135deg,var(--p-ember),var(--p-ember-soft)) !important;
+  box-shadow:0 0 0 2px rgba(255,253,247,.9), 0 4px 12px rgba(198,90,36,.5)}
+
+/* ───────── Botones premium con sheen ───────── */
+.button{
+  position:relative; overflow:hidden; border-radius:var(--r-sm) !important;
+  transition:transform var(--dur-2) var(--ease-spring), box-shadow var(--dur-2) var(--ease-out),
+    background var(--dur-2) var(--ease-out), border-color var(--dur-2) var(--ease-out);
+  will-change:transform;
+}
+.button::after{ /* sheen al hover */
+  content:""; position:absolute; top:0; left:-120%; width:60%; height:100%;
+  background:linear-gradient(100deg,transparent,rgba(255,255,255,.35),transparent);
+  transform:skewX(-18deg); transition:left .6s var(--ease-out); pointer-events:none;
+}
+.button:hover{transform:translateY(-2px)}
+.button:hover::after{left:140%}
+.button:active{transform:translateY(0) scale(.98)}
+.button.dark{background:linear-gradient(135deg,var(--p-ink),var(--p-ink-3)) !important;
+  border-color:transparent !important; box-shadow:var(--shadow-md)}
+.button.dark:hover{background:linear-gradient(135deg,var(--p-ember),var(--p-ember-soft)) !important;
+  box-shadow:var(--glow-soft)}
+.button.light{border-color:rgba(255,255,255,.7) !important; backdrop-filter:blur(6px)}
+.button.light:hover{background:rgba(255,255,255,.16) !important; box-shadow:0 0 30px rgba(255,255,255,.25)}
+
+/* ───────── Cards premium (producto, categoría, servicio, info) ───────── */
+.product-card,.checkout-card,.order-card,.account-card,.info-card,.quote-card,.service-card{
+  position:relative; transition:transform var(--dur-3) var(--ease-out), box-shadow var(--dur-3) var(--ease-out),
+    border-color var(--dur-3) var(--ease-out); will-change:transform;
+}
+.product-card{
+  background:var(--glass-light-2) !important; -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px);
+  border:1px solid var(--glass-border); border-radius:var(--r-md) !important;
+  box-shadow:var(--shadow-sm) !important;
+}
+.product-card::before{ /* halo superior al hover */
+  content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none;
+  box-shadow:0 0 0 0 var(--p-ember-glow); transition:box-shadow var(--dur-3) var(--ease-out);
+}
+.product-card:hover{transform:translateY(-10px); box-shadow:var(--shadow-lg) !important;
+  border-color:rgba(198,90,36,.3)}
+.product-card:hover::before{box-shadow:0 0 0 1px rgba(198,90,36,.2), 0 0 50px var(--p-ember-glow)}
+.product-card:hover .product-media img{transform:scale(1.06)}
+.product-tag{border-radius:var(--r-xs) !important;
+  background:linear-gradient(135deg,var(--p-ember),var(--p-ember-soft)) !important;
+  box-shadow:0 6px 16px rgba(198,90,36,.4)}
+.favorite{border-radius:var(--r-pill) !important; -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px);
+  background:var(--glass-light) !important; border:1px solid var(--glass-border) !important;
+  transition:all var(--dur-2) var(--ease-spring)}
+.favorite:hover{transform:scale(1.12) rotate(6deg); box-shadow:var(--shadow-md)}
+.favorite.active{color:var(--p-ember) !important}
+.quick-add{border-radius:var(--r-sm) !important; background:var(--glass-dark) !important;
+  -webkit-backdrop-filter:blur(12px); backdrop-filter:blur(12px);
+  border:1px solid var(--glass-border-dark) !important; transition:all var(--dur-3) var(--ease-spring)}
+.quick-add:hover{background:var(--p-ember) !important; box-shadow:var(--glow-soft)}
+
+.category-card{border-radius:var(--r-lg) !important; box-shadow:var(--shadow-md) !important}
+.category-card:hover{transform:translateY(-6px); box-shadow:var(--shadow-xl) !important}
+.category-card:hover img{transform:scale(1.07)}
+
+.checkout-card,.order-card,.account-card,.info-card{
+  background:var(--glass-light) !important; -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px);
+  border:1px solid var(--glass-border) !important; box-shadow:var(--shadow-md) !important;
+  border-radius:var(--r-lg) !important;
+}
+.quote-card{background:var(--glass-light) !important; -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px);
+  border:1px solid var(--glass-border) !important}
+.service-card{border-radius:var(--r-md) !important; background:var(--glass-light-2) !important;
+  -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px); border:1px solid var(--glass-border) !important;
+  border-top:3px solid transparent !important; border-image:linear-gradient(90deg,var(--p-ember),var(--p-gold)) 1 !important;
+  transition:all var(--dur-3) var(--ease-out)}
+.service-card:hover{transform:translateY(-4px); box-shadow:var(--shadow-md)}
+
+/* ───────── Hero premium (luz volumétrica + parallax base) ───────── */
+.hero{background:radial-gradient(120% 100% at 20% 0%, var(--p-ink-2), var(--p-ink)) !important}
+.hero-media{animation-duration:1.4s !important}
+.hero:after{background:var(--p-ember) !important; opacity:.35 !important; filter:blur(120px) !important}
+.hero h1 em{text-shadow:0 12px 60px rgba(226,121,62,.45) !important}
+/* Línea de luz horizontal sutil */
+.hero .hero-content::before{
+  content:""; position:absolute; left:-10%; top:62%; width:50%; height:1px;
+  background:linear-gradient(90deg,transparent,var(--p-ember-soft),transparent);
+  filter:blur(.5px); opacity:.6;
+}
+.page-hero{background:linear-gradient(120deg,var(--p-ink),var(--p-ink-3)) !important}
+.page-hero:after{background:var(--p-ember) !important}
+
+/* ───────── Tabs / pills / selects / inputs ───────── */
+.category-tabs a{
+  border-radius:var(--r-pill) !important; transition:all var(--dur-2) var(--ease-spring);
+  background:var(--glass-light-2) !important; border:1px solid transparent;
+}
+.category-tabs a:hover{transform:translateY(-1px); box-shadow:var(--shadow-sm)}
+.category-tabs a.active{background:linear-gradient(135deg,var(--p-ember),var(--p-ember-soft)) !important;
+  box-shadow:0 8px 20px rgba(198,90,36,.4)}
+
+.account-tabs button{transition:all var(--dur-2) var(--ease-out); border-bottom:3px solid transparent !important}
+.account-tabs button.active{border-bottom-color:var(--p-ember) !important}
+
+.field input,.field select,.field textarea,.size-options button,.qty-control{
+  border-radius:var(--r-sm) !important; transition:all var(--dur-2) var(--ease-out);
+}
+.field input:focus,.field select:focus,.field textarea:focus{
+  border-color:var(--p-ember) !important; box-shadow:0 0 0 4px rgba(198,90,36,.14) !important;
+}
+.size-options button{border-color:var(--p-line-strong) !important; background:var(--glass-light-2) !important}
+.size-options button:hover:not(:disabled){border-color:var(--p-ember) !important; transform:translateY(-2px)}
+.size-options button.selected{background:linear-gradient(135deg,var(--p-ink),var(--p-ink-3)) !important;
+  border-color:transparent !important; box-shadow:var(--shadow-md)}
+
+/* ───────── Cart drawer + overlay glass ───────── */
+.cart-overlay{background:rgba(23,21,18,.5) !important; -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px)}
+.cart-drawer{background:var(--glass-light) !important; -webkit-backdrop-filter:blur(24px) saturate(140%);
+  backdrop-filter:blur(24px) saturate(140%); border-left:1px solid var(--glass-border) !important;
+  box-shadow:var(--shadow-xl) !important}
+.cart-item img{border-radius:var(--r-sm) !important}
+.cart-controls button{border-radius:var(--r-xs) !important; transition:all var(--dur-1) var(--ease-out)}
+.cart-controls button:hover{background:var(--p-ink) !important; color:#fff}
+.shipping-progress b{background:linear-gradient(90deg,var(--p-ember),var(--p-gold)) !important}
+
+/* ───────── Search strip glass ───────── */
+.search-strip{background:var(--glass-light) !important; -webkit-backdrop-filter:blur(24px) saturate(150%);
+  backdrop-filter:blur(24px) saturate(150%); border-bottom:1px solid var(--glass-border) !important}
+
+/* ───────── Toast premium ───────── */
+.toast{
+  background:var(--glass-dark) !important; -webkit-backdrop-filter:blur(20px); backdrop-filter:blur(20px);
+  border:1px solid var(--glass-border-dark) !important; border-radius:var(--r-pill) !important;
+  box-shadow:var(--shadow-lg) !important; font-weight:600; padding:14px 22px !important;
+}
+
+/* ───────── Cookies premium ───────── */
+.cookies{border-radius:var(--r-lg) !important; -webkit-backdrop-filter:blur(20px); backdrop-filter:blur(20px);
+  background:var(--glass-light) !important; border:1px solid var(--glass-border) !important;
+  border-top:3px solid transparent !important; border-image:linear-gradient(90deg,var(--p-ember),var(--p-gold)) 1 !important}
+.cookies .accept{border-radius:var(--r-sm) !important; background:linear-gradient(135deg,var(--p-ink),var(--p-ink-3)) !important}
+
+/* ───────── Announcement premium ───────── */
+.announcement{background:linear-gradient(90deg,var(--p-ink),var(--p-ink-3),var(--p-ink)) !important;
+  background-size:200% 100%; animation:pintao-announce 12s linear infinite}
+@keyframes pintao-announce{to{background-position:200% 0}}
+
+/* ───────── Empty states premium ───────── */
+.empty-state,.no-results{
+  border-radius:var(--r-lg) !important; background:var(--glass-light-2) !important;
+  -webkit-backdrop-filter:blur(12px); backdrop-filter:blur(12px);
+  border:1px dashed var(--p-line-strong) !important; padding:70px 30px !important;
+}
+.empty-state h2{letter-spacing:-1px}
+.empty-state::before{ /* icono abstracto */
+  content:""; display:block; width:64px; height:64px; margin:0 auto 22px;
+  background:radial-gradient(circle, rgba(198,90,36,.25), transparent 70%);
+  border-radius:50%; animation:pintao-pulse 3s var(--ease-in-out) infinite;
+}
+@keyframes pintao-pulse{0%,100%{transform:scale(1); opacity:.7}50%{transform:scale(1.12); opacity:1}}
+.success-panel b{box-shadow:0 0 0 8px rgba(50,103,72,.12), 0 0 40px rgba(50,103,72,.3) !important}
+
+/* ───────── Skeletons / shimmer ───────── */
+.skeleton{
+  position:relative; overflow:hidden; background:linear-gradient(90deg,#ece4d5 25%,#f6efe2 50%,#ece4d5 75%);
+  background-size:200% 100%; border-radius:var(--r-sm); animation:pintao-shimmer 1.4s infinite linear;
+}
+.skeleton.text{height:12px; margin:6px 0}
+.skeleton.text.lg{height:22px}
+.skeleton.block{height:160px}
+@keyframes pintao-shimmer{to{background-position:-200% 0}}
+#featuredGrid.is-loading .product-card,
+#catalogGrid.is-loading .product-card{ /* placeholder mientras carga */ }
+
+/* ───────── Scroll reveal (premium.js añade .reveal) ───────── */
+.reveal{opacity:0; transform:translateY(22px); transition:opacity var(--dur-4) var(--ease-out),
+  transform var(--dur-4) var(--ease-out); will-change:opacity,transform}
+.reveal.in{opacity:1; transform:none}
+.reveal[data-delay="1"]{transition-delay:.08s}
+.reveal[data-delay="2"]{transition-delay:.16s}
+.reveal[data-delay="3"]{transition-delay:.24s}
+.reveal[data-delay="4"]{transition-delay:.32s}
+
+/* Stagger para grids */
+.stagger>*{opacity:0; transform:translateY(18px); transition:opacity var(--dur-3) var(--ease-out),
+  transform var(--dur-3) var(--ease-out)}
+.stagger.in>*{opacity:1; transform:none}
+.stagger.in>:nth-child(1){transition-delay:0ms}
+.stagger.in>:nth-child(2){transition-delay:60ms}
+.stagger.in>:nth-child(3){transition-delay:120ms}
+.stagger.in>:nth-child(4){transition-delay:180ms}
+.stagger.in>:nth-child(5){transition-delay:240ms}
+.stagger.in>:nth-child(6){transition-delay:300ms}
+.stagger.in>:nth-child(7){transition-delay:360ms}
+.stagger.in>:nth-child(8){transition-delay:420ms}
+
+/* ───────── Count-up KPIs ───────── */
+[data-count]{font-variant-numeric:tabular-nums}
+
+/* ───────── Focus mejorado accesible ───────── */
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,summary:focus-visible{
+  outline:2px solid var(--p-ember) !important; outline-offset:3px !important;
+  border-radius:4px;
+}
+
+/* ───────── Detalles: footer, faq, steps ───────── */
+.site-footer{background:linear-gradient(180deg,var(--p-ink),#0e0c0a) !important; position:relative; overflow:hidden}
+.site-footer::before{ /* halo superior */
+  content:""; position:absolute; top:-120px; left:10%; width:50%; height:240px;
+  background:radial-gradient(ellipse, rgba(198,90,36,.2), transparent 70%); filter:blur(40px);
+}
+.faq-list summary{transition:color var(--dur-2) var(--ease-out)}
+.faq-list summary:hover{color:var(--p-ember)}
+.faq-list details[open] summary{color:var(--p-ember)}
+.steps article{transition:transform var(--dur-3) var(--ease-out)}
+.steps article:hover{transform:translateX(6px)}
+
+/* ───────── Responsive: reducir efectos en móvil ───────── */
+@media(max-width:1050px){
+  .pintao-atmosphere::before{width:80vw; height:80vw}
+}
+@media(max-width:720px){
+  .pintao-atmosphere::before,.pintao-atmosphere::after{filter:blur(40px); opacity:.7}
+  .product-card:hover{transform:translateY(-4px)}
+  .button:hover{transform:translateY(-1px)}
+  .reveal{transform:translateY(12px)}
+  /* En móvil no forzamos hover-only; quick-add siempre visible ya por CSS base */
+}
+
+/* ───────── Reduced motion: desactivar todo lo decorativo ───────── */
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms !important; animation-iteration-count:1 !important;
+    transition-duration:.001ms !important; scroll-behavior:auto !important}
+  .pintao-atmosphere::before,.pintao-atmosphere::after{animation:none !important}
+  .reveal,.stagger>*{opacity:1 !important; transform:none !important}
+  .announcement{animation:none !important}
+  .button::after{display:none}
+}
