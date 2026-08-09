@@ -1016,7 +1016,17 @@
       "active": true
     }
   ],
-  "users": [],
+  "users": [
+    {
+      "id": "11111111-2222-3333-4444-555555555555",
+      "name": "Cliente Demo PINTAO",
+      "email": "cliente@pintao.local",
+      "type": "Empresa",
+      "salt": "b6cc4056e5f15a953d6d4baf025560f4",
+      "hash": "931217eab1ddad8e21e174df2a4e3a1cfe25d99ddf375990d04e9ed1ea68c3b1ae2d181ff7f504e14d05ae141be27c58bddba67cd9f06d98628049de309c4fe3",
+      "createdAt": "2026-08-09T22:46:00.000Z"
+    }
+  ],
   "orders": [],
   "quotes": [],
   "newsletter": [],

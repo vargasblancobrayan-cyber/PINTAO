@@ -92,7 +92,30 @@ body.drawer-open{overflow:hidden}
   -webkit-background-clip:text; background-clip:text; color:transparent;
   font-weight:800; letter-spacing:2.6px;
 }
-.section-title{letter-spacing:-3px; text-wrap:balance}
+.section-title{letter-spacing:-3px; text-wrap:balance; font-weight:700}
+.section-copy{letter-spacing:.1px; text-wrap:pretty}
+/* Jerarquía numérica tabular para precios/stocks */
+.product-meta strong,.product-price,.order-totals .grand,.cart-summary div strong,
+.checkout-item strong:last-child,.account-order strong{font-variant-numeric:tabular-nums}
+/* Refinamiento de links y body */
+body{font-feature-settings:"ss01","cv01"; -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility}
+.product-info-card h3 a,.related-section a{transition:color var(--dur-2) var(--ease-out)}
+.product-info-card h3 a:hover,.related-section a:hover{color:var(--p-ember)}
+.product-meta{border-color:var(--p-line) !important}
+.product-meta span{color:var(--p-green) !important; font-weight:600}
+.product-info-card small{color:var(--p-ember) !important}
+/* Breadcrumb y detail */
+.breadcrumb{letter-spacing:1.6px}
+.detail-accordion details{transition:border-color var(--dur-2)}
+.detail-accordion summary:hover{color:var(--p-ember)}
+/* Hover lines y separadores más finos */
+.section-heading{border-color:var(--p-line) !important}
+.field input,.field select,.field textarea{border-color:var(--p-line) !important}
+.faq-list details{border-color:var(--p-line) !important}
+.steps article{border-color:var(--p-line) !important}
+/* Inputs range premium */
+.filter-panel input[type=range]{accent-color:var(--p-ember); height:4px}
+.range-output output{font-variant-numeric:tabular-nums; font-weight:600; color:var(--p-ink)}
 
 /* ───────── Header glass premium ───────── */
 .site-header{
@@ -343,3 +366,75 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
   .announcement{animation:none !important}
   .button::after{display:none}
 }
+
+/* ═══════════════ REFUERZO ESTÉTICO — pulido premium ═══════════════ */
+
+/* Badges de estado de pedido (semánticos, usados por cuenta.js y admin) */
+.order-status,.status-pill{
+  display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:var(--r-pill);
+  font-size:9px;font-weight:700;letter-spacing:.6px;line-height:1;border:1px solid transparent;white-space:nowrap;
+}
+.order-status::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor;opacity:.85}
+.order-status[data-state="Pendiente de confirmación"]{background:rgba(214,166,74,.14);color:#8a6311;border-color:rgba(214,166,74,.3)}
+.order-status[data-state="Pagado"]{background:rgba(76,175,114,.14);color:#2f7a4d;border-color:rgba(76,175,114,.3)}
+.order-status[data-state="Enviado"]{background:rgba(58,124,191,.14);color:#2c5d8f;border-color:rgba(58,124,191,.3)}
+.order-status[data-state="Completado"]{background:rgba(50,103,72,.16);color:var(--p-green);border-color:rgba(50,103,72,.35)}
+.order-status[data-state="Cancelado"]{background:rgba(192,57,43,.12);color:var(--p-red);border-color:rgba(192,57,43,.3)}
+
+/* KPIs y números siempre tabulares */
+.stats strong,.bars i,#revenue,#orderCount,#productCount,#customerCount{font-variant-numeric:tabular-nums}
+
+/* Cuenta: pedidos más legibles y con badge */
+.account-order{border-radius:var(--r-md) !important;border:1px solid var(--p-line) !important;
+  transition:all var(--dur-3) var(--ease-out);background:var(--glass-light-2) !important}
+.account-order:hover{transform:translateY(-2px);border-color:var(--p-line-strong) !important;box-shadow:var(--shadow-md)}
+.account-order strong{font-size:13px;letter-spacing:.5px}
+.account-order div:last-child strong{font-size:11px}
+
+/* Checkout: notas y totales refinados */
+.checkout-note{border-radius:var(--r-sm) !important;border-left:3px solid var(--p-ember) !important;
+  background:rgba(198,90,36,.07) !important}
+.order-totals{border-color:var(--p-line) !important}
+.order-totals .grand{font-size:17px !important}
+
+/* Success panel: check animado */
+.success-panel b{animation:pintao-pop .6s var(--ease-spring) both !important}
+@keyframes pintao-pop{0%{transform:scale(0);opacity:0}60%{transform:scale(1.12)}100%{transform:scale(1);opacity:1}}
+
+/* Info cards: nav activo y hover */
+.info-nav a{border-radius:var(--r-sm) !important;transition:all var(--dur-2) var(--ease-out);
+  border-bottom:1px solid var(--p-line) !important}
+.info-nav a:hover{background:var(--glass-light-2) !important;color:var(--p-ember) !important;padding-left:18px}
+
+/* Botón cuenta / auth premium */
+.account-tabs button{border-radius:var(--r-sm) var(--r-sm) 0 0 !important}
+
+/* Inputs checkout/cuenta coherentes con design system */
+.checkout-card input,.checkout-card select,.account-card input,.account-card select,
+#quoteForm input,#quoteForm select,#quoteForm textarea{
+  border-radius:var(--r-sm) !important;border:1px solid var(--p-line) !important;background:#fff !important;
+  transition:all var(--dur-2) var(--ease-out)}
+.checkout-card input:focus,.checkout-card select:focus,.account-card input:focus,.account-card select:focus,
+#quoteForm input:focus,#quoteForm select:focus,#quoteForm textarea:focus{
+  border-color:var(--p-ember) !important;box-shadow:0 0 0 4px rgba(198,90,36,.14) !important;outline:none !important}
+
+/* Zoom control premium */
+.zoom-control{border-radius:var(--r-sm) !important;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+  background:var(--glass-light) !important;border:1px solid var(--glass-border) !important;transition:all var(--dur-2) var(--ease-spring)}
+.zoom-control:hover{transform:scale(1.08);box-shadow:var(--shadow-md)}
+
+/* Stock badge producto */
+.stock-badge{border-radius:var(--r-pill) !important;font-weight:700}
+
+/* Related section heading coherente */
+.related-section{background:linear-gradient(180deg,transparent,rgba(198,90,36,.04))}
+
+/* Scrollbar premium (sutil) */
+*::-webkit-scrollbar{width:10px;height:10px}
+*::-webkit-scrollbar-track{background:transparent}
+*::-webkit-scrollbar-thumb{background:rgba(38,25,13,.18);border-radius:var(--r-pill);border:2px solid transparent;background-clip:padding-box}
+*::-webkit-scrollbar-thumb:hover{background:rgba(198,90,36,.4);background-clip:padding-box}
+.cart-items::-webkit-scrollbar-thumb{background:rgba(38,25,13,.15)}
+
+/* Selection ya definida en base; reforzar coherencia */
+::selection{background:var(--p-ember);color:#fff;text-shadow:none}
