@@ -38,6 +38,19 @@ En desarrollo, si no se definen variables de entorno:
 
 Para otro entorno, copiar `.env.example` y definir `ADMIN_EMAIL` y `ADMIN_PASSWORD` en el proceso antes de iniciar. El panel y sus API requieren una sesión administrativa.
 
+## Cuentas de demostración
+
+El repositorio incluye dos cuentas listas para probar el flujo completo:
+
+| Rol | Correo | Contraseña | Dónde iniciar sesión |
+|---|---|---|---|
+| Administrador | `admin@pintao.local` | `Pintao2026!` | `/admin/login` |
+| Cliente | `cliente@pintao.local` | `Cliente2026!` | `/cuenta` |
+
+- El cliente demo (`Cliente Demo PINTAO`, tipo Empresa) está sembrado en `data/store.json`.
+- El administrador en desarrollo se resuelve desde `ADMIN_EMAIL`/`ADMIN_PASSWORD` (valores por defecto arriba). En producción, la migración `supabase/migrations/202608090001_seed_default_admin.sql` siembra el mismo administrador en `pintao_admin_users` con hash PBKDF2-SHA256 a 210000 iteraciones.
+- **Cámbialas antes de un lanzamiento real** rotando el hash desde un proceso seguro.
+
 ## Alcance del pago
 
 El checkout registra solicitudes pendientes de confirmación. No simula un cobro. Para cobrar en producción se debe integrar una pasarela y validar sus notificaciones en el servidor.

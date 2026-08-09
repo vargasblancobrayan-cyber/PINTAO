@@ -289,3 +289,56 @@ header h1{color:var(--a-text) !important; letter-spacing:-1px}
   .login-brand::before,.live i{animation:none !important}
   .primary::after{display:none}
 }
+
+/* ═══════════════ REFUERZO ESTÉTICO — pulido premium admin ═══════════════ */
+
+/* Badges de estado de pedido sobre superficie oscura */
+.order-status{font-size:9px;padding:4px 10px}
+.order-status[data-state="Pendiente de confirmación"]{background:rgba(214,166,74,.16);color:var(--a-amber);border-color:rgba(214,166,74,.35)}
+.order-status[data-state="Pagado"]{background:rgba(76,175,114,.16);color:var(--a-green);border-color:rgba(76,175,114,.35)}
+.order-status[data-state="Enviado"]{background:rgba(86,156,224,.16);color:#6fb4e8;border-color:rgba(86,156,224,.35)}
+.order-status[data-state="Completado"]{background:rgba(76,175,114,.2);color:var(--a-green);border-color:rgba(76,175,114,.4)}
+.order-status[data-state="Cancelado"]{background:rgba(224,88,75,.16);color:var(--a-red);border-color:rgba(224,88,75,.35)}
+
+/* Fila de estado: select + badge alineados */
+.row-status{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.row-status .status{font-size:9px;padding:5px 8px}
+
+/* Stats: label y small más nítidos */
+.stats article>span:first-child{letter-spacing:1.2px;font-weight:600}
+.stats article>small{letter-spacing:.4px}
+#lowStock,#pendingCount{color:var(--a-amber) !important;font-weight:600}
+#lowStock{color:var(--a-red) !important}
+
+/* Chart card: eje y tooltip sutil */
+.chart-card .bars{position:relative}
+.chart-card .bars i:hover{filter:brightness(1.25)}
+.chart-card::after{content:"Valores en COP";position:absolute;right:22px;top:18px;font-size:8px;color:var(--a-muted-2);letter-spacing:.5px}
+
+/* Productos admin: tag de stock visible */
+.admin-product footer p{font-size:9px;letter-spacing:.4px}
+.admin-product footer p:not(.stock-low){color:var(--a-green) !important}
+
+/* Tabla: sticky header dentro de scroll */
+.table-scroll .admin-row.header{position:sticky;top:0;z-index:2;backdrop-filter:blur(8px)}
+
+/* Modal: separador y focus mejorado */
+.modal .two{margin-top:0}
+.modal label{letter-spacing:.8px;font-weight:600}
+.modal-actions{margin-top:22px}
+
+/* Settings: inputs full width coherentes */
+.settings-card input{width:100%}
+.settings-card label{font-weight:600;letter-spacing:.5px}
+
+/* Sidebar: badge de rol más vivo */
+.role-card i{font-size:12px}
+
+/* Header: título con mejor tracking */
+header h1{font-weight:600}
+
+/* Scrollbar admin premium */
+*::-webkit-scrollbar{width:10px;height:10px}
+*::-webkit-scrollbar-track{background:transparent}
+*::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:999px;border:2px solid transparent;background-clip:padding-box}
+*::-webkit-scrollbar-thumb:hover{background:rgba(226,121,62,.5);background-clip:padding-box}
