@@ -5,6 +5,7 @@
   "rewrites": [
     { "source": "/api/:path*", "destination": "https://vbypxdliurgljviirlwp.supabase.co/functions/v1/store-api/api/:path*" },
     { "source": "/producto/:id", "destination": "/producto" },
+    { "source": "/acceso", "destination": "/acceso" },
     { "source": "/admin/login", "destination": "/admin-login" }
   ],
   "headers": [
