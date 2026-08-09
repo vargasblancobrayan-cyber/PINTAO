@@ -1,0 +1,10 @@
+:root{--red:#c65a24}
+.sidebar{border-right:3px solid var(--red)}
+.admin-logo{font-weight:900;letter-spacing:-1.5px}
+.admin-logo small{color:#d88a5e}
+.role-card i{background:var(--red)}
+.primary:hover{background:var(--red)}
+.login-brand{background:radial-gradient(circle at 20% 70%,rgba(198,90,36,.65),transparent 36%),linear-gradient(135deg,#0c0d0e,#2c251f)}
+.admin-login-page .eyebrow{color:#e2793e}
+.login-panel{background:#f2eadc}
+.login-panel form{border-top:4px solid var(--red)}

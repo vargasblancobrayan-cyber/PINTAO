@@ -1,0 +1,11 @@
+{
+  "name": "pintao-store",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node server.js",
+    "check": "node --check server.js && node --check shop.js && node --check app.js && node --check catalogo.js && node --check producto.js && node --check checkout.js && node --check cuenta.js && node --check admin.js && node --check admin-login.js && node --check verify.js",
+    "verify": "node verify.js"
+  },
+  "engines": { "node": ">=18" }
+}

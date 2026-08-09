@@ -1,0 +1,18 @@
+const base=process.env.BASE_URL||'http://127.0.0.1:4173';
+function assert(value,message){if(!value)throw new Error(message)}
+async function request(path,options={}){const response=await fetch(base+path,options),text=await response.text();let data;try{data=JSON.parse(text)}catch{data=text}return {response,data,cookie:response.headers.get('set-cookie')?.split(';')[0]}}
+(async()=>{
+  for(const route of ['/','/catalogo','/producto/1','/checkout','/cuenta','/informacion','/admin/login']){const {response}=await request(route);assert(response.ok,`${route} respondió ${response.status}`)}
+  let result=await request('/api/admin/stats');assert(result.response.status===401,'Las estadísticas administrativas deben estar protegidas');
+  result=await request('/api/products',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'});assert(result.response.status===401,'La escritura de productos debe estar protegida');
+  const products=(await request('/api/products')).data;assert(products.length>=22,'El catálogo debe contener colecciones suficientes');assert(new Set(products.map(p=>p.category)).size>=15,'Las colecciones deben ser independientes');assert(products.every(p=>p.stock===p.variants.reduce((sum,v)=>sum+v.stock,0)),'El inventario por variante no coincide');
+  const initialStock=products[0].stock,email=`test-${Date.now()}@example.com`;
+  result=await request('/api/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:'Comprador de prueba',email,password:'prueba-segura-2026',type:'Empresa'})});assert(result.response.status===201,'No se pudo registrar al comprador');const customerCookie=result.cookie;assert(customerCookie,'No se creó la sesión del comprador');
+  result=await request('/api/orders',{method:'POST',headers:{'Content-Type':'application/json',Cookie:customerCookie},body:JSON.stringify({items:[{id:products[0].id,size:products[0].variants[0].size,qty:6}],customer:{name:'Comprador de prueba',email,phone:'3000000000',document:'900000',city:'Bogotá',address:'Calle 1'},payment:'Enlace de pago'})});assert(result.response.status===201,'No se pudo crear el pedido');assert(result.data.status==='Pendiente de confirmación','El pedido debe quedar pendiente de confirmación');const orderId=result.data.id;
+  result=await request('/api/account',{headers:{Cookie:customerCookie}});assert(result.response.ok&&result.data.orders.length===1,'La cuenta no muestra el pedido creado');
+  result=await request('/api/admin/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:process.env.ADMIN_EMAIL||'admin@pintao.local',password:process.env.ADMIN_PASSWORD||'Pintao2026!'})});assert(result.response.ok,'No se pudo iniciar sesión como administrador');const adminCookie=result.cookie;
+  result=await request('/api/admin/orders/'+encodeURIComponent(orderId),{method:'PATCH',headers:{'Content-Type':'application/json',Cookie:adminCookie},body:JSON.stringify({status:'Cancelado'})});assert(result.response.ok&&result.data.status==='Cancelado','No se pudo cancelar el pedido');
+  const finalProducts=(await request('/api/products')).data;assert(finalProducts.find(p=>p.id===products[0].id).stock===initialStock,'La cancelación no devolvió el inventario');
+  result=await request('/api/admin/settings',{method:'PATCH',headers:{'Content-Type':'application/json',Cookie:adminCookie},body:JSON.stringify({brand:'PINTAO',whatsapp:'573001112233',minOrder:1,freeShipping:250000})});assert(result.response.ok&&result.data.whatsapp==='573001112233','La configuración no se guardó');
+  console.log('VERIFICACIÓN COMPLETA: rutas, catálogo, roles, cuenta, pedido, inventario y configuración.');
+})().catch(error=>{console.error(error.message);process.exitCode=1});

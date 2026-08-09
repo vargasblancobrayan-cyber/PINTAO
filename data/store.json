@@ -1,0 +1,1030 @@
+{
+  "products": [
+    {
+      "id": 1,
+      "name": "Polo Azul Nocturno",
+      "price": 56900,
+      "category": "Camisetas",
+      "color": "Azul",
+      "sizes": [
+        "S",
+        "M",
+        "L",
+        "XL"
+      ],
+      "stock": 32,
+      "img": "https://images.unsplash.com/photo-1618517351616-38fb9c5210c6?auto=format&fit=crop&w=700&q=85",
+      "description": "Esencial de cuello polo con estructura limpia y tacto suave.",
+      "composition": "Composición y ficha técnica disponibles para compradores registrados.",
+      "care": "Seguir las instrucciones de la etiqueta de cuidado.",
+      "variants": [
+        {
+          "size": "S",
+          "color": "Azul",
+          "stock": 8,
+          "sku": "PNT-1-S"
+        },
+        {
+          "size": "M",
+          "color": "Azul",
+          "stock": 8,
+          "sku": "PNT-1-M"
+        },
+        {
+          "size": "L",
+          "color": "Azul",
+          "stock": 8,
+          "sku": "PNT-1-L"
+        },
+        {
+          "size": "XL",
+          "color": "Azul",
+          "stock": 8,
+          "sku": "PNT-1-XL"
+        }
+      ],
+      "gallery": [
+        "https://images.unsplash.com/photo-1618517351616-38fb9c5210c6?auto=format&fit=crop&w=700&q=85"
+      ],
+      "tag": "NUEVO",
+      "active": true
+    },
+    {
+      "id": 2,
+      "name": "Camiseta Premium Carbón",
+      "price": 54900,
+      "category": "Básicas",
+      "color": "Negro",
+      "sizes": [
+        "S",
+        "M",
+        "L",
+        "XL",
+        "XXL"
+      ],
+      "stock": 28,
+      "img": "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=700&q=85",
+      "description": "Camiseta versátil de corte regular para una rotación comercial constante.",
+      "composition": "Composición y ficha técnica disponibles para compradores registrados.",
+      "care": "Seguir las instrucciones de la etiqueta de cuidado.",
+      "variants": [
+        {
+          "size": "S",
+          "color": "Negro",
+          "stock": 6,
+          "sku": "PNT-2-S"
+        },
+        {
+          "size": "M",
+          "color": "Negro",
+          "stock": 6,
+          "sku": "PNT-2-M"
+        },
+        {
+          "size": "L",
+          "color": "Negro",
+          "stock": 6,
+          "sku": "PNT-2-L"
+        },
+        {
+          "size": "XL",
+          "color": "Negro",
+          "stock": 5,
+          "sku": "PNT-2-XL"
+        },
+        {
+          "size": "XXL",
+          "color": "Negro",
+          "stock": 5,
+          "sku": "PNT-2-XXL"
+        }
+      ],
+      "gallery": [
+        "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=700&q=85"
+      ],
+      "tag": "NUEVO",
+      "active": true
+    },
+    {
+      "id": 3,
+      "name": "Oversize Arena",
+      "price": 49900,
+      "category": "Oversize",
+      "color": "Crema",
+      "sizes": [
+        "S",
+        "M",
+        "L",
+        "XL"
+      ],
+      "stock": 19,
+      "img": "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?auto=format&fit=crop&w=700&q=85",
+      "description": "Silueta amplia, hombro caído y presencia urbana.",
+      "composition": "Composición y ficha técnica disponibles para compradores registrados.",
+      "care": "Seguir las instrucciones de la etiqueta de cuidado.",
+      "variants": [
+        {
+          "size": "S",
+          "color": "Crema",
+          "stock": 5,
+          "sku": "PNT-3-S"
+        },
+        {
+          "size": "M",
+          "color": "Crema",
+          "stock": 5,
+          "sku": "PNT-3-M"
+        },
+        {
+          "size": "L",
+          "color": "Crema",
+          "stock": 5,
+          "sku": "PNT-3-L"
+        },
+        {
+          "size": "XL",
+          "color": "Crema",
+          "stock": 4,
+          "sku": "PNT-3-XL"
+        }
+      ],
+      "gallery": [
+        "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?auto=format&fit=crop&w=700&q=85"
+      ],
+      "tag": "NUEVO",
+      "active": true
+    },
+    {
+      "id": 4,
+      "name": "Polo Essential Blanco",
+      "price": 57900,
+      "category": "Camisetas",
+      "color": "Blanco",
+      "sizes": [
+        "S",
+        "M",
+        "L",
+        "XL"
+      ],
+      "stock": 36,
+      "img": "https://images.unsplash.com/photo-1625910513413-5fc45e7b3086?auto=format&fit=crop&w=700&q=85",
+      "description": "Polo luminoso para vitrinas de básicos premium.",
+      "composition": "Composición y ficha técnica disponibles para compradores registrados.",
+      "care": "Seguir las instrucciones de la etiqueta de cuidado.",
+      "variants": [
+        {
+          "size": "S",
+          "color": "Blanco",
+          "stock": 9,
+          "sku": "PNT-4-S"
+        },
+        {
+          "size": "M",
+          "color": "Blanco",
+          "stock": 9,
+          "sku": "PNT-4-M"
+        },
+        {
+          "size": "L",
+          "color": "Blanco",
+          "stock": 9,
+          "sku": "PNT-4-L"
+        },
+        {
+          "size": "XL",
+          "color": "Blanco",
+          "stock": 9,
+          "sku": "PNT-4-XL"
+        }
+      ],
+      "gallery": [
+        "https://images.unsplash.com/photo-1625910513413-5fc45e7b3086?auto=format&fit=crop&w=700&q=85"
+      ],
+      "tag": "NUEVO",
+      "active": true
+    },
+    {
+      "id": 5,
+      "name": "Chaqueta Urban Negra",
+      "price": 98900,
+      "category": "Chaquetas",
+      "color": "Negro",
+      "sizes": [
+        "S",
+        "M",
+        "L",
+        "XL"
+      ],
+      "stock": 13,
+      "img": "https://images.unsplash.com/photo-1551028719-00167b16eac5?auto=format&fit=crop&w=700&q=85",
+      "description": "Chaqueta ligera con estética nocturna y acabado resistente.",
+      "composition": "Composición y ficha técnica disponibles para compradores registrados.",
+      "care": "Seguir las instrucciones de la etiqueta de cuidado.",
+      "variants": [
+        {
+          "size": "S",
+          "color": "Negro",
+          "stock": 4,
+          "sku": "PNT-5-S"
+        },
+        {
+          "size": "M",
+          "color": "Negro",
+          "stock": 3,
+          "sku": "PNT-5-M"
+        },
+        {
+          "size": "L",
+          "color": "Negro",
+          "stock": 3,
+          "sku": "PNT-5-L"
+        },
+        {
+          "size": "XL",
+          "color": "Negro",
+          "stock": 3,
+          "sku": "PNT-5-XL"
+        }
+      ],
+      "gallery": [
+        "https://images.unsplash.com/photo-1551028719-00167b16eac5?auto=format&fit=crop&w=700&q=85"
+      ],
+      "tag": "NUEVO",
+      "active": true
+    },
+    {
+      "id": 6,
+      "name": "Buzo Active Arena",
+      "price": 74900,
+      "category": "Deportiva",
+      "color": "Crema",
+      "sizes": [
+        "S",
+        "M",
+        "L",
+        "XL"
+      ],
+      "stock": 21,
+      "img": "https://images.unsplash.com/photo-1578681994506-b8f463449011?auto=format&fit=crop&w=700&q=85",
+      "description": "Capa cómoda para movimiento diario y looks deportivos.",
+      "composition": "Composición y ficha técnica disponibles para compradores registrados.",
+      "care": "Seguir las instrucciones de la etiqueta de cuidado.",
+      "variants": [
+        {
+          "size": "S",
+          "color": "Crema",
+          "stock": 6,
+          "sku": "PNT-6-S"
+        },
+        {
+          "size": "M",
+          "color": "Crema",
+          "stock": 5,
+          "sku": "PNT-6-M"
+        },
+        {
+          "size": "L",
+          "color": "Crema",
+          "stock": 5,
+          "sku": "PNT-6-L"
+        },
+        {
+          "size": "XL",
+          "color": "Crema",
+          "stock": 5,
+          "sku": "PNT-6-XL"
+        }
+      ],
+      "gallery": [
+        "https://images.unsplash.com/photo-1578681994506-b8f463449011?auto=format&fit=crop&w=700&q=85"
+      ],
+      "tag": "NUEVO",
+      "active": true
+    },
+    {
+      "id": 7,
+      "name": "Jean Slim Índigo",
+      "price": 89900,
+      "category": "Jeans",
+      "color": "Azul",
+      "sizes": [
+        "30",
+        "32",
+        "34",
+        "36",
+        "38"
+      ],
+      "stock": 24,
+      "img": "https://images.unsplash.com/photo-1542272604-787c3835535d?auto=format&fit=crop&w=700&q=85",
+      "description": "Denim índigo de silueta slim y construcción comercial.",
+      "composition": "Composición y ficha técnica disponibles para compradores registrados.",
+      "care": "Seguir las instrucciones de la etiqueta de cuidado.",
+      "variants": [
+        {
+          "size": "30",
+          "color": "Azul",
+          "stock": 5,
+          "sku": "PNT-7-30"
+        },
+        {
+          "size": "32",
+          "color": "Azul",
+          "stock": 5,
+          "sku": "PNT-7-32"
+        },
+        {
+          "size": "34",
+          "color": "Azul",
+          "stock": 5,
+          "sku": "PNT-7-34"
+        },
+        {
+          "size": "36",
+          "color": "Azul",
+          "stock": 5,
+          "sku": "PNT-7-36"
+        },
+        {
+          "size": "38",
+          "color": "Azul",
+          "stock": 4,
+          "sku": "PNT-7-38"
+        }
+      ],
+      "gallery": [
+        "https://images.unsplash.com/photo-1542272604-787c3835535d?auto=format&fit=crop&w=700&q=85"
+      ],
+      "tag": "NUEVO",
+      "active": true
+    },
+    {
+      "id": 8,
+      "name": "Cargo Utility Negro",
+      "price": 84900,
+      "category": "Cargos",
+      "color": "Negro",
+      "sizes": [
+        "30",
+        "32",
+        "34",
+        "36"
+      ],
+      "stock": 17,
+      "img": "https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?auto=format&fit=crop&w=700&q=85",
+      "description": "Pantalón cargo con bolsillos funcionales y caída contemporánea.",
+      "composition": "Composición y ficha técnica disponibles para compradores registrados.",
+      "care": "Seguir las instrucciones de la etiqueta de cuidado.",
+      "variants": [
+        {
+          "size": "30",
+          "color": "Negro",
+          "stock": 5,
+          "sku": "PNT-8-30"
+        },
+        {
+          "size": "32",
+          "color": "Negro",
+          "stock": 4,
+          "sku": "PNT-8-32"
+        },
+        {
+          "size": "34",
+          "color": "Negro",
+          "stock": 4,
+          "sku": "PNT-8-34"
+        },
+        {
+          "size": "36",
+          "color": "Negro",
+          "stock": 4,
+          "sku": "PNT-8-36"
+        }
+      ],
+      "gallery": [
+        "https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?auto=format&fit=crop&w=700&q=85"
+      ],
+      "tag": "NUEVO",
+      "active": true
+    },
+    {
+      "id": 9,
+      "name": "Gorra Essential Negra",
+      "price": 35900,
+      "category": "Gorras",
+      "color": "Negro",
+      "sizes": [
+        "ÚNICA"
+      ],
+      "stock": 40,
+      "img": "https://images.unsplash.com/photo-1588850561407-ed78c282e89b?auto=format&fit=crop&w=700&q=85",
+      "description": "Accesorio ajustable de seis paneles y acabado mate.",
+      "composition": "Composición y ficha técnica disponibles para compradores registrados.",
+      "care": "Seguir las instrucciones de la etiqueta de cuidado.",
+      "variants": [
+        {
+          "size": "ÚNICA",
+          "color": "Negro",
+          "stock": 40,
+          "sku": "PNT-9-ÚNICA"
+        }
+      ],
+      "gallery": [
+        "https://images.unsplash.com/photo-1588850561407-ed78c282e89b?auto=format&fit=crop&w=700&q=85"
+      ],
+      "tag": "NUEVO",
+      "active": true
+    },
+    {
+      "id": 10,
+      "name": "Camiseta Training Blanca",
+      "price": 52900,
+      "category": "Deportiva",
+      "color": "Blanco",
+      "sizes": [
+        "S",
+        "M",
+        "L",
+        "XL"
+      ],
+      "stock": 31,
+      "img": "https://images.unsplash.com/photo-1581655353564-df123a1eb820?auto=format&fit=crop&w=700&q=85",
+      "description": "Camiseta liviana para actividad, viaje y uso cotidiano.",
+      "composition": "Composición y ficha técnica disponibles para compradores registrados.",
+      "care": "Seguir las instrucciones de la etiqueta de cuidado.",
+      "variants": [
+        {
+          "size": "S",
+          "color": "Blanco",
+          "stock": 8,
+          "sku": "PNT-10-S"
+        },
+        {
+          "size": "M",
+          "color": "Blanco",
+          "stock": 8,
+          "sku": "PNT-10-M"
+        },
+        {
+          "size": "L",
+          "color": "Blanco",
+          "stock": 8,
+          "sku": "PNT-10-L"
+        },
+        {
+          "size": "XL",
+          "color": "Blanco",
+          "stock": 7,
+          "sku": "PNT-10-XL"
+        }
+      ],
+      "gallery": [
+        "https://images.unsplash.com/photo-1581655353564-df123a1eb820?auto=format&fit=crop&w=700&q=85"
+      ],
+      "tag": "NUEVO",
+      "active": true
+    },
+    {
+      "id": 11,
+      "name": "Chaqueta Denim Azul",
+      "price": 119900,
+      "category": "Chaquetas",
+      "color": "Azul",
+      "sizes": [
+        "S",
+        "M",
+        "L",
+        "XL"
+      ],
+      "stock": 8,
+      "img": "https://images.unsplash.com/photo-1495105787522-5334e3ffa0ef?auto=format&fit=crop&w=700&q=85",
+      "description": "Denim estructurado con lavado azul y herrajes metálicos.",
+      "composition": "Composición y ficha técnica disponibles para compradores registrados.",
+      "care": "Seguir las instrucciones de la etiqueta de cuidado.",
+      "variants": [
+        {
+          "size": "S",
+          "color": "Azul",
+          "stock": 2,
+          "sku": "PNT-11-S"
+        },
+        {
+          "size": "M",
+          "color": "Azul",
+          "stock": 2,
+          "sku": "PNT-11-M"
+        },
+        {
+          "size": "L",
+          "color": "Azul",
+          "stock": 2,
+          "sku": "PNT-11-L"
+        },
+        {
+          "size": "XL",
+          "color": "Azul",
+          "stock": 2,
+          "sku": "PNT-11-XL"
+        }
+      ],
+      "gallery": [
+        "https://images.unsplash.com/photo-1495105787522-5334e3ffa0ef?auto=format&fit=crop&w=700&q=85"
+      ],
+      "tag": "NUEVO",
+      "active": true
+    },
+    {
+      "id": 12,
+      "name": "Gorra Premium Crema",
+      "price": 38900,
+      "category": "Gorras",
+      "color": "Crema",
+      "sizes": [
+        "ÚNICA"
+      ],
+      "stock": 27,
+      "img": "https://images.unsplash.com/photo-1521369909029-2afed882baee?auto=format&fit=crop&w=700&q=85",
+      "description": "Gorra tonal para completar colecciones neutras.",
+      "composition": "Composición y ficha técnica disponibles para compradores registrados.",
+      "care": "Seguir las instrucciones de la etiqueta de cuidado.",
+      "variants": [
+        {
+          "size": "ÚNICA",
+          "color": "Crema",
+          "stock": 27,
+          "sku": "PNT-12-ÚNICA"
+        }
+      ],
+      "gallery": [
+        "https://images.unsplash.com/photo-1521369909029-2afed882baee?auto=format&fit=crop&w=700&q=85"
+      ],
+      "tag": "NUEVO",
+      "active": true
+    },
+    {
+      "id": 13,
+      "name": "Tenis Urban Blanco",
+      "price": 129900,
+      "category": "Zapatos",
+      "color": "Blanco",
+      "sizes": [
+        "39",
+        "40",
+        "41",
+        "42",
+        "43"
+      ],
+      "stock": 18,
+      "img": "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=900&q=85",
+      "description": "Tenis de perfil limpio y suela confortable.",
+      "composition": "Composición y ficha técnica disponibles para compradores registrados.",
+      "care": "Seguir las instrucciones de la etiqueta de cuidado.",
+      "variants": [
+        {
+          "size": "39",
+          "color": "Blanco",
+          "stock": 4,
+          "sku": "PNT-13-39"
+        },
+        {
+          "size": "40",
+          "color": "Blanco",
+          "stock": 4,
+          "sku": "PNT-13-40"
+        },
+        {
+          "size": "41",
+          "color": "Blanco",
+          "stock": 4,
+          "sku": "PNT-13-41"
+        },
+        {
+          "size": "42",
+          "color": "Blanco",
+          "stock": 3,
+          "sku": "PNT-13-42"
+        },
+        {
+          "size": "43",
+          "color": "Blanco",
+          "stock": 3,
+          "sku": "PNT-13-43"
+        }
+      ],
+      "gallery": [
+        "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=900&q=85"
+      ],
+      "tag": "NUEVO",
+      "active": true
+    },
+    {
+      "id": 14,
+      "name": "Perfume Signature Noir",
+      "price": 159900,
+      "category": "Perfumes",
+      "color": "Negro",
+      "sizes": [
+        "100 ML"
+      ],
+      "stock": 14,
+      "img": "https://images.unsplash.com/photo-1541643600914-78b084683601?auto=format&fit=crop&w=900&q=85",
+      "description": "Aroma amaderado de carácter nocturno y larga duración.",
+      "composition": "Presentación de 100 ml.",
+      "care": "Conservar en un lugar fresco y protegido de la luz.",
+      "variants": [
+        {
+          "size": "100 ML",
+          "color": "Negro",
+          "stock": 14,
+          "sku": "PNT-14-100ML"
+        }
+      ],
+      "gallery": [
+        "https://images.unsplash.com/photo-1541643600914-78b084683601?auto=format&fit=crop&w=900&q=85"
+      ],
+      "tag": "NUEVO",
+      "active": true
+    },
+    {
+      "id": 15,
+      "name": "Morral Executive Negro",
+      "price": 89900,
+      "category": "Morrales",
+      "color": "Negro",
+      "sizes": [
+        "ÚNICA"
+      ],
+      "stock": 12,
+      "img": "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=900&q=85",
+      "description": "Morral funcional con compartimentos para trabajo y viaje.",
+      "composition": "Composición y ficha técnica disponibles para compradores registrados.",
+      "care": "Seguir las instrucciones de la etiqueta de cuidado.",
+      "variants": [
+        {
+          "size": "ÚNICA",
+          "color": "Negro",
+          "stock": 12,
+          "sku": "PNT-15-ÚNICA"
+        }
+      ],
+      "gallery": [
+        "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=900&q=85"
+      ],
+      "tag": "NUEVO",
+      "active": true
+    },
+    {
+      "id": 16,
+      "name": "Correa Classic Café",
+      "price": 44900,
+      "category": "Correas",
+      "color": "Café",
+      "sizes": [
+        "M",
+        "L",
+        "XL"
+      ],
+      "stock": 22,
+      "img": "https://images.unsplash.com/photo-1624222247344-550fb60583dc?auto=format&fit=crop&w=900&q=85",
+      "description": "Correa clásica de textura sobria y hebilla metálica.",
+      "composition": "Composición y ficha técnica disponibles para compradores registrados.",
+      "care": "Seguir las instrucciones de la etiqueta de cuidado.",
+      "variants": [
+        {
+          "size": "M",
+          "color": "Café",
+          "stock": 8,
+          "sku": "PNT-16-M"
+        },
+        {
+          "size": "L",
+          "color": "Café",
+          "stock": 7,
+          "sku": "PNT-16-L"
+        },
+        {
+          "size": "XL",
+          "color": "Café",
+          "stock": 7,
+          "sku": "PNT-16-XL"
+        }
+      ],
+      "gallery": [
+        "https://images.unsplash.com/photo-1624222247344-550fb60583dc?auto=format&fit=crop&w=900&q=85"
+      ],
+      "tag": "DESTACADO",
+      "active": true
+    },
+    {
+      "id": 17,
+      "name": "Camiseta Gráfica District",
+      "price": 59900,
+      "category": "Estampadas",
+      "color": "Negro",
+      "sizes": [
+        "S",
+        "M",
+        "L",
+        "XL"
+      ],
+      "stock": 25,
+      "img": "https://images.unsplash.com/photo-1503341504253-dff4815485f1?auto=format&fit=crop&w=900&q=85",
+      "description": "Gráfico frontal de inspiración urbana sobre algodón de alto gramaje.",
+      "composition": "Composición y ficha técnica disponibles para compradores registrados.",
+      "care": "Seguir las instrucciones de la etiqueta de cuidado.",
+      "variants": [
+        {
+          "size": "S",
+          "color": "Negro",
+          "stock": 7,
+          "sku": "PNT-17-S"
+        },
+        {
+          "size": "M",
+          "color": "Negro",
+          "stock": 6,
+          "sku": "PNT-17-M"
+        },
+        {
+          "size": "L",
+          "color": "Negro",
+          "stock": 6,
+          "sku": "PNT-17-L"
+        },
+        {
+          "size": "XL",
+          "color": "Negro",
+          "stock": 6,
+          "sku": "PNT-17-XL"
+        }
+      ],
+      "gallery": [
+        "https://images.unsplash.com/photo-1503341504253-dff4815485f1?auto=format&fit=crop&w=900&q=85"
+      ],
+      "tag": "NUEVO",
+      "active": true
+    },
+    {
+      "id": 18,
+      "name": "Básica Heavy Blanco",
+      "price": 51900,
+      "category": "Básicas",
+      "color": "Blanco",
+      "sizes": [
+        "S",
+        "M",
+        "L",
+        "XL"
+      ],
+      "stock": 30,
+      "img": "https://images.unsplash.com/photo-1603252109303-2751441dd157?auto=format&fit=crop&w=900&q=85",
+      "description": "Básica de alto gramaje, cuello reforzado y tacto compacto.",
+      "composition": "Composición y ficha técnica disponibles para compradores registrados.",
+      "care": "Seguir las instrucciones de la etiqueta de cuidado.",
+      "variants": [
+        {
+          "size": "S",
+          "color": "Blanco",
+          "stock": 8,
+          "sku": "PNT-18-S"
+        },
+        {
+          "size": "M",
+          "color": "Blanco",
+          "stock": 8,
+          "sku": "PNT-18-M"
+        },
+        {
+          "size": "L",
+          "color": "Blanco",
+          "stock": 7,
+          "sku": "PNT-18-L"
+        },
+        {
+          "size": "XL",
+          "color": "Blanco",
+          "stock": 7,
+          "sku": "PNT-18-XL"
+        }
+      ],
+      "gallery": [
+        "https://images.unsplash.com/photo-1603252109303-2751441dd157?auto=format&fit=crop&w=900&q=85"
+      ],
+      "tag": "NUEVO",
+      "active": true
+    },
+    {
+      "id": 19,
+      "name": "Pantalón Chino Piedra",
+      "price": 79900,
+      "category": "Pantalones",
+      "color": "Crema",
+      "sizes": [
+        "30",
+        "32",
+        "34",
+        "36"
+      ],
+      "stock": 20,
+      "img": "https://images.unsplash.com/photo-1473966968600-fa801b869a1a?auto=format&fit=crop&w=900&q=85",
+      "description": "Chino versátil con pinza suave y ajuste cómodo.",
+      "composition": "Composición y ficha técnica disponibles para compradores registrados.",
+      "care": "Seguir las instrucciones de la etiqueta de cuidado.",
+      "variants": [
+        {
+          "size": "30",
+          "color": "Crema",
+          "stock": 5,
+          "sku": "PNT-19-30"
+        },
+        {
+          "size": "32",
+          "color": "Crema",
+          "stock": 5,
+          "sku": "PNT-19-32"
+        },
+        {
+          "size": "34",
+          "color": "Crema",
+          "stock": 5,
+          "sku": "PNT-19-34"
+        },
+        {
+          "size": "36",
+          "color": "Crema",
+          "stock": 5,
+          "sku": "PNT-19-36"
+        }
+      ],
+      "gallery": [
+        "https://images.unsplash.com/photo-1473966968600-fa801b869a1a?auto=format&fit=crop&w=900&q=85"
+      ],
+      "tag": "NUEVO",
+      "active": true
+    },
+    {
+      "id": 20,
+      "name": "Bermuda Resort Arena",
+      "price": 64900,
+      "category": "Bermudas",
+      "color": "Crema",
+      "sizes": [
+        "30",
+        "32",
+        "34",
+        "36"
+      ],
+      "stock": 22,
+      "img": "https://images.unsplash.com/photo-1591195853828-11db59a44f6b?auto=format&fit=crop&w=900&q=85",
+      "description": "Bermuda liviana de largo comercial para clima cálido.",
+      "composition": "Composición y ficha técnica disponibles para compradores registrados.",
+      "care": "Seguir las instrucciones de la etiqueta de cuidado.",
+      "variants": [
+        {
+          "size": "30",
+          "color": "Crema",
+          "stock": 6,
+          "sku": "PNT-20-30"
+        },
+        {
+          "size": "32",
+          "color": "Crema",
+          "stock": 6,
+          "sku": "PNT-20-32"
+        },
+        {
+          "size": "34",
+          "color": "Crema",
+          "stock": 5,
+          "sku": "PNT-20-34"
+        },
+        {
+          "size": "36",
+          "color": "Crema",
+          "stock": 5,
+          "sku": "PNT-20-36"
+        }
+      ],
+      "gallery": [
+        "https://images.unsplash.com/photo-1591195853828-11db59a44f6b?auto=format&fit=crop&w=900&q=85"
+      ],
+      "tag": "DESTACADO",
+      "active": true
+    },
+    {
+      "id": 21,
+      "name": "Oversize Washed Grafito",
+      "price": 62900,
+      "category": "Oversize",
+      "color": "Negro",
+      "sizes": [
+        "S",
+        "M",
+        "L",
+        "XL"
+      ],
+      "stock": 18,
+      "img": "https://images.unsplash.com/photo-1554568218-0f1715e72254?auto=format&fit=crop&w=900&q=85",
+      "description": "Oversize de lavado grafito con tacto vintage.",
+      "composition": "Composición y ficha técnica disponibles para compradores registrados.",
+      "care": "Seguir las instrucciones de la etiqueta de cuidado.",
+      "variants": [
+        {
+          "size": "S",
+          "color": "Negro",
+          "stock": 5,
+          "sku": "PNT-21-S"
+        },
+        {
+          "size": "M",
+          "color": "Negro",
+          "stock": 5,
+          "sku": "PNT-21-M"
+        },
+        {
+          "size": "L",
+          "color": "Negro",
+          "stock": 4,
+          "sku": "PNT-21-L"
+        },
+        {
+          "size": "XL",
+          "color": "Negro",
+          "stock": 4,
+          "sku": "PNT-21-XL"
+        }
+      ],
+      "gallery": [
+        "https://images.unsplash.com/photo-1554568218-0f1715e72254?auto=format&fit=crop&w=900&q=85"
+      ],
+      "tag": "NUEVO",
+      "active": true
+    },
+    {
+      "id": 22,
+      "name": "Jean Straight Vintage",
+      "price": 94900,
+      "category": "Jeans",
+      "color": "Azul",
+      "sizes": [
+        "30",
+        "32",
+        "34",
+        "36",
+        "38"
+      ],
+      "stock": 16,
+      "img": "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?auto=format&fit=crop&w=900&q=85",
+      "description": "Jean recto de lavado medio y construcción resistente.",
+      "composition": "Composición y ficha técnica disponibles para compradores registrados.",
+      "care": "Seguir las instrucciones de la etiqueta de cuidado.",
+      "variants": [
+        {
+          "size": "30",
+          "color": "Azul",
+          "stock": 4,
+          "sku": "PNT-22-30"
+        },
+        {
+          "size": "32",
+          "color": "Azul",
+          "stock": 3,
+          "sku": "PNT-22-32"
+        },
+        {
+          "size": "34",
+          "color": "Azul",
+          "stock": 3,
+          "sku": "PNT-22-34"
+        },
+        {
+          "size": "36",
+          "color": "Azul",
+          "stock": 3,
+          "sku": "PNT-22-36"
+        },
+        {
+          "size": "38",
+          "color": "Azul",
+          "stock": 3,
+          "sku": "PNT-22-38"
+        }
+      ],
+      "gallery": [
+        "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?auto=format&fit=crop&w=900&q=85"
+      ],
+      "tag": "NUEVO",
+      "active": true
+    }
+  ],
+  "users": [],
+  "orders": [],
+  "quotes": [],
+  "newsletter": [],
+  "settings": {
+    "brand": "PINTAO",
+    "freeShipping": 250000,
+    "minOrder": 1,
+    "whatsapp": "",
+    "currency": "COP"
+  }
+}
