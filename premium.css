@@ -85,6 +85,8 @@
 /* El cuerpo deja ver el fondo atmosférico */
 body{background:transparent !important; position:relative; z-index:var(--z-base);}
 body.drawer-open{overflow:hidden}
+/* El atributo [hidden] SIEMPRE oculta (evita que .field{display:grid} lo anule) */
+[hidden]{display:none !important}
 
 /* ───────── Tipografía / jerarquía ───────── */
 .eyebrow{
@@ -496,11 +498,15 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 
 .access-actions{margin-top:8px}
 .access-error{color:var(--p-red);font-size:11px;min-height:16px;margin:4px 0 0}
-.access-toggle{font-size:10px;color:var(--p-mist);margin-top:14px;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.access-toggle{
+  margin-top:18px;padding-top:18px;border-top:1px solid var(--p-line);
+  display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:center;
+  font-size:10px;color:var(--p-mist)
+}
 .access-toggle button{border:0;background:none;color:var(--p-ember);font-weight:700;cursor:pointer;
   font-size:10px;letter-spacing:.8px;padding:0;text-decoration:underline;text-underline-offset:3px}
 .access-demo{
-  margin-top:16px;padding:12px 14px;border-radius:var(--r-sm);background:var(--glass-light-2);
+  margin-top:14px;padding:12px 14px;border-radius:var(--r-sm);background:var(--glass-light-2);
   border:1px dashed var(--p-line-strong);display:flex;gap:8px;align-items:center;flex-wrap:wrap;
   font-size:9px;color:var(--p-mist);letter-spacing:.4px
 }
