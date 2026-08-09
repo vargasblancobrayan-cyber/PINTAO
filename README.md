@@ -26,6 +26,7 @@ Abrir `http://127.0.0.1:4173/`.
 - `/producto/1` detalle de producto
 - `/checkout` confirmación del pedido
 - `/cuenta` acceso e historial del comprador
+- `/acceso` acceso unificado (cliente y administrador)
 - `/informacion` envíos, cambios y privacidad
 - `/admin/login` acceso administrativo
 

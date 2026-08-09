@@ -151,7 +151,7 @@ async function api(req,res,url){
   return json(res,404,{error:'Ruta no encontrada'});
 }
 
-const routeFiles={'/':'index.html','/catalogo':'catalogo.html','/producto':'producto.html','/checkout':'checkout.html','/cuenta':'cuenta.html','/informacion':'informacion.html','/admin':'admin.html','/admin/login':'admin-login.html'};
+const routeFiles={'/':'index.html','/catalogo':'catalogo.html','/producto':'producto.html','/checkout':'checkout.html','/cuenta':'cuenta.html','/informacion':'informacion.html','/acceso':'acceso.html','/admin':'admin.html','/admin/login':'admin-login.html'};
 function routeFile(pathname){if(routeFiles[pathname])return routeFiles[pathname];if(/^\/producto\/\d+$/.test(pathname))return 'producto.html';return decodeURIComponent(pathname).replace(/^\/+/, '')}
 function serve(res,pathname){const rel=routeFile(pathname),file=path.resolve(ROOT,rel);if(!file.startsWith(ROOT)||file.includes(`${path.sep}data${path.sep}`))return json(res,403,{error:'Acceso denegado'});fs.readFile(file,(err,data)=>{if(err)return json(res,404,{error:'Página no encontrada'});const ext=path.extname(file),types={'.html':'text/html; charset=utf-8','.css':'text/css; charset=utf-8','.js':'application/javascript; charset=utf-8','.json':'application/json','.png':'image/png','.jpg':'image/jpeg','.webp':'image/webp','.svg':'image/svg+xml','.txt':'text/plain; charset=utf-8','.xml':'application/xml; charset=utf-8'};res.writeHead(200,{'Content-Type':types[ext]||'application/octet-stream','Cache-Control':ext==='.html'?'no-cache':'public, max-age=3600','X-Content-Type-Options':'nosniff','X-Frame-Options':'SAMEORIGIN','Referrer-Policy':'strict-origin-when-cross-origin','Permissions-Policy':'camera=(), microphone=(), geolocation=()'});res.end(data)})}
 

@@ -1025,16 +1025,56 @@
       "salt": "b6cc4056e5f15a953d6d4baf025560f4",
       "hash": "931217eab1ddad8e21e174df2a4e3a1cfe25d99ddf375990d04e9ed1ea68c3b1ae2d181ff7f504e14d05ae141be27c58bddba67cd9f06d98628049de309c4fe3",
       "createdAt": "2026-08-09T22:46:00.000Z"
+    },
+    {
+      "id": "d06de3a7-1434-4e5d-92fa-1ff34f464845",
+      "name": "Comprador de prueba",
+      "email": "test-1786317927737@example.com",
+      "type": "Empresa",
+      "salt": "404e5d37969509367cef7d694327d857",
+      "hash": "43e60d1687b977d5b621948813437a4c724eb01195c2a6620f93c118ef82294de99b16cf04e16b1d7a4fb6daa83ba2ffa74637717348bf832edf5363ff2f2db6",
+      "createdAt": "2026-08-09T23:25:27.787Z"
     }
   ],
-  "orders": [],
+  "orders": [
+    {
+      "id": "PNT-17927791",
+      "items": [
+        {
+          "productId": 1,
+          "name": "Polo Azul Nocturno",
+          "price": 56900,
+          "qty": 6,
+          "size": "S",
+          "img": "https://images.unsplash.com/photo-1618517351616-38fb9c5210c6?auto=format&fit=crop&w=700&q=85"
+        }
+      ],
+      "base": 341400,
+      "discount": 0,
+      "coupon": 0,
+      "total": 341400,
+      "status": "Cancelado",
+      "customer": {
+        "name": "Comprador de prueba",
+        "email": "test-1786317927737@example.com",
+        "phone": "3000000000",
+        "document": "900000",
+        "city": "Bogotá",
+        "address": "Calle 1",
+        "type": "Persona natural"
+      },
+      "payment": "Enlace de pago",
+      "createdAt": "2026-08-09T23:25:27.791Z",
+      "stockReleased": true
+    }
+  ],
   "quotes": [],
   "newsletter": [],
   "settings": {
     "brand": "PINTAO",
     "freeShipping": 250000,
     "minOrder": 1,
-    "whatsapp": "",
+    "whatsapp": "573001112233",
     "currency": "COP"
   }
 }

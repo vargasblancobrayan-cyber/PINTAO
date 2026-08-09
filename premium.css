@@ -438,3 +438,89 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 
 /* Selection ya definida en base; reforzar coherencia */
 ::selection{background:var(--p-ember);color:#fff;text-shadow:none}
+
+/* ═══════════════ PÁGINA DE ACCESO UNIFICADA ═══════════════ */
+.access-layout{
+  display:grid;grid-template-columns:1.05fr .95fr;min-height:calc(100svh - 88px);
+  align-items:stretch;
+}
+.access-hero{
+  position:relative;color:#fff;padding:80px 6vw;display:flex;flex-direction:column;justify-content:center;gap:18px;
+  background:
+    radial-gradient(120% 100% at 18% 12%, rgba(226,121,62,.32), transparent 46%),
+    radial-gradient(110% 90% at 88% 88%, rgba(233,178,94,.22), transparent 48%),
+    linear-gradient(140deg,var(--p-ink),var(--p-ink-3));
+  overflow:hidden;
+}
+.access-hero::before{ /* blob ambiental */
+  content:"";position:absolute;width:420px;height:420px;left:-120px;bottom:-140px;
+  background:radial-gradient(circle,rgba(226,121,62,.35),transparent 60%);filter:blur(60px);
+  animation:pintao-float-a 20s var(--ease-in-out) infinite;pointer-events:none;
+}
+.access-hero::after{ /* línea de luz */
+  content:"";position:absolute;left:6vw;bottom:90px;width:38%;height:1px;
+  background:linear-gradient(90deg,transparent,var(--p-ember-soft),transparent);opacity:.6;
+}
+.access-hero h1{font:700 clamp(48px,6vw,96px)/.84 'Manrope';letter-spacing:-5px;margin:6px 0;position:relative;z-index:2}
+.access-hero h1 em{font-family:Georgia,serif;font-weight:400;color:var(--p-ember-soft);
+  text-shadow:0 12px 50px rgba(226,121,62,.4)}
+.access-hero p{color:#ddd;max-width:460px;line-height:1.7;font-size:15px;position:relative;z-index:2}
+.access-hero .eyebrow{position:relative;z-index:2}
+.access-benefits{list-style:none;margin:14px 0 22px;padding:0;display:grid;gap:14px;max-width:460px;position:relative;z-index:2}
+.access-benefits li{display:grid;grid-template-columns:130px 1fr;gap:14px;padding:14px 0;
+  border-top:1px solid rgba(255,255,255,.16);align-items:center}
+.access-benefits b{font-size:10px;letter-spacing:1.4px;color:var(--p-ember-soft)}
+.access-benefits span{font-size:13px;color:#ccc;line-height:1.6}
+.access-hero .button.light{position:relative;z-index:2;align-self:flex-start}
+
+.access-panel{display:grid;place-items:center;padding:60px 5vw;background:transparent}
+.access-card{
+  width:min(480px,100%);background:var(--glass-light) !important;
+  -webkit-backdrop-filter:blur(20px) saturate(140%);backdrop-filter:blur(20px) saturate(140%);
+  border:1px solid var(--glass-border) !important;border-radius:var(--r-lg) !important;
+  box-shadow:var(--shadow-lg) !important;padding:34px 30px;
+  animation:pintao-modal-in .6s var(--ease-spring) both;
+}
+.access-card h2{font:600 28px 'Manrope';margin:8px 0 6px}
+.access-hint{font-size:13px;color:var(--p-mist);margin:0 0 22px;line-height:1.6}
+.access-card .eyebrow{display:block}
+
+.role-switch{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:var(--glass-light-2);
+  border:1px solid var(--p-line);border-radius:var(--r-pill);padding:5px;margin-bottom:26px}
+.role-switch button{
+  border:0;background:transparent;padding:11px;border-radius:var(--r-pill);cursor:pointer;
+  font-size:10px;font-weight:700;letter-spacing:1px;color:var(--p-muted);transition:all var(--dur-2) var(--ease-spring)}
+.role-switch button.active{
+  background:linear-gradient(135deg,var(--p-ember),var(--p-ember-soft));color:#fff;
+  box-shadow:0 8px 20px rgba(198,90,36,.4)}
+
+.access-actions{margin-top:8px}
+.access-error{color:var(--p-red);font-size:11px;min-height:16px;margin:4px 0 0}
+.access-toggle{font-size:10px;color:var(--p-mist);margin-top:14px;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.access-toggle button{border:0;background:none;color:var(--p-ember);font-weight:700;cursor:pointer;
+  font-size:10px;letter-spacing:.8px;padding:0;text-decoration:underline;text-underline-offset:3px}
+.access-demo{
+  margin-top:16px;padding:12px 14px;border-radius:var(--r-sm);background:var(--glass-light-2);
+  border:1px dashed var(--p-line-strong);display:flex;gap:8px;align-items:center;flex-wrap:wrap;
+  font-size:9px;color:var(--p-mist);letter-spacing:.4px
+}
+.access-demo span{font-weight:700;letter-spacing:.8px}
+.access-demo code{font-family:'DM Sans',monospace;background:var(--glass-dark);color:#fff;
+  padding:4px 8px;border-radius:var(--r-xs);font-size:9px;letter-spacing:.3px}
+
+@media(max-width:1050px){
+  .access-layout{grid-template-columns:1fr}
+  .access-hero{min-height:360px;padding:50px 6vw}
+  .access-hero h1{font-size:clamp(40px,8vw,64px)}
+  .access-hero::after{display:none}
+}
+@media(max-width:720px){
+  .access-hero{padding:40px 22px}
+  .access-benefits li{grid-template-columns:110px 1fr;gap:10px}
+  .access-panel{padding:30px 16px}
+  .access-card{padding:26px 20px}
+}
+@media(prefers-reduced-motion:reduce){
+  .access-hero::before{animation:none !important}
+  .access-card{animation:none !important}
+}
