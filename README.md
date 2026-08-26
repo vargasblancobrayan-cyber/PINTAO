@@ -2,6 +2,8 @@
 
 Tienda multipágina de PINTAO con portada, catálogo por colecciones, búsqueda, fichas de producto, carrito, checkout, cuenta de comprador, venta por volumen y administración protegida.
 
+**Nuevo frontend premium:** una aplicación Next.js 15 + TypeScript + Tailwind v4 + Framer Motion en [`web/`](web/README.md). La tienda legacy sigue en la raíz para referencia.
+
 ## Producción
 
 - Tienda pública: `https://pintao-store.vercel.app`
