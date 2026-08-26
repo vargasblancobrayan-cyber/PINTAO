@@ -18,26 +18,26 @@ function DiscountProgress({ count }: { count: number }) {
   const current = [...TIERS].reverse().find((t) => t.qty <= count);
   const pct = next ? count / next.qty : 1;
   return (
-    <div className="rounded-xl border border-accent/25 bg-accent/5 px-4 py-3">
-      <div className="mb-2 flex items-center justify-between text-[11px]">
+    <div className="rounded-2xl border-2 border-accent/40 bg-gradient-to-r from-accent/15 to-accent/5 px-5 py-4">
+      <div className="mb-2.5 flex items-center justify-between gap-3">
         {next ? (
-          <span className="text-sand">
+          <span className="text-sm text-sand">
             Llevas <strong className="text-cream">{count}</strong> und. — a las{" "}
             <strong className="text-cream">{next.qty}</strong> obtienes{" "}
             <strong className="text-accent">-{next.discount * 100}%</strong>
           </span>
         ) : (
-          <span className="text-sand">
+          <span className="text-sm text-sand">
             Descuento máximo activo: <strong className="text-accent">-{Math.round((current?.discount ?? 0) * 100)}%</strong>
           </span>
         )}
-        <span className="font-display text-accent">
+        <span className="shrink-0 rounded-full bg-accent px-2.5 py-1 text-xs font-bold text-noir">
           {Math.round(volumeDiscount(count) * 100)}% OFF
         </span>
       </div>
-      <div className="h-1 overflow-hidden rounded-full bg-ash">
+      <div className="h-1.5 overflow-hidden rounded-full bg-noir/50">
         <motion.div
-          className="h-full bg-accent"
+          className="h-full rounded-full bg-accent shadow-[0_0_10px_rgba(222,164,24,0.7)]"
           initial={false}
           animate={{ width: `${Math.min(pct * 100, 100)}%` }}
           transition={{ type: "spring", damping: 25 }}
@@ -84,7 +84,7 @@ export function CartDrawer() {
             aria-hidden
           />
           <motion.aside
-            className="fixed right-0 top-0 z-50 flex h-full w-full max-w-md flex-col border-l border-line bg-coal"
+            className="fixed right-0 top-0 z-50 flex h-full w-full max-w-xl flex-col border-l-2 border-accent/40 bg-coal shadow-2xl shadow-black/60"
             initial={{ x: "100%" }}
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
@@ -92,24 +92,31 @@ export function CartDrawer() {
             role="dialog"
             aria-label="Carrito de compras"
           >
-            <div className="flex items-center justify-between border-b border-line px-6 py-5">
-              <div className="flex items-center gap-3">
-                <svg width="22" height="22" viewBox="0 0 24 24" className="text-accent" fill="currentColor" aria-hidden>
-                  <path d="M7 22c-1.1 0-2-.9-2-2V7H3v13c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-4h-2v4H7ZM17 4h-3V2h-4v2H7v2h10V4Zm1 4h-2v3l2 1.2V8Z" />
-                </svg>
-                <h2 className="font-display text-lg uppercase tracking-[0.2em]">
-                  Tu pinta
-                </h2>
-                {count > 0 && (
-                  <span className="rounded-full bg-accent px-2 py-0.5 text-[11px] font-bold text-noir">
-                    {count}
-                  </span>
-                )}
+            <div className="flex items-center justify-between border-b border-accent/30 bg-accent/5 px-7 py-6">
+              <div className="flex items-center gap-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-accent text-noir">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+                    <path d="M7 22c-1.1 0-2-.9-2-2V7H3v13c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-4h-2v4H7ZM17 4h-3V2h-4v2H7v2h10V4Zm1 4h-2v3l2 1.2V8Z" />
+                  </svg>
+                </div>
+                <div>
+                  <h2 className="font-display text-2xl uppercase tracking-[0.15em] text-cream">
+                    Tu pinta
+                  </h2>
+                  <p className="text-xs tracking-[0.25em] text-sand">
+                    {count === 0 ? "vacío" : `${count} prenda${count !== 1 ? "s" : ""}`}
+                  </p>
+                </div>
               </div>
+              {count > 0 && (
+                <span className="rounded-full bg-accent px-3.5 py-1.5 text-sm font-bold text-noir">
+                  {count}
+                </span>
+              )}
               <button
                 onClick={() => setOpen(false)}
                 aria-label="Cerrar carrito"
-                className="group flex h-9 w-9 items-center justify-center rounded-full border border-line text-mute transition hover:border-accent hover:text-accent"
+                className="absolute right-6 top-6 flex h-11 w-11 items-center justify-center rounded-full border-2 border-line text-mute transition hover:border-accent hover:bg-accent hover:text-noir"
               >
                 ×
               </button>
@@ -147,68 +154,68 @@ export function CartDrawer() {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, x: 40 }}
                         transition={{ type: "spring", damping: 25 }}
-                        className="group mb-4 flex gap-4 rounded-xl border border-line bg-ash/40 p-3 transition-colors hover:border-accent/40"
+                        className="group mb-4 flex gap-5 rounded-2xl border-2 border-line bg-ash/60 p-4 transition-colors hover:border-accent/50 hover:bg-ash"
                       >
                         <Link
                           href={`/producto/${l.productId}`}
                           onClick={() => setOpen(false)}
-                          className="relative h-24 w-20 shrink-0 overflow-hidden rounded-lg bg-ash"
+                          className="relative h-28 w-24 shrink-0 overflow-hidden rounded-xl bg-noir"
                         >
                           <Image
                             src={l.product.img}
                             alt={l.product.name}
                             fill
-                            className="object-cover transition-transform duration-300 group-hover:scale-105"
+                            className="object-cover transition-transform duration-300 group-hover:scale-110"
                           />
                         </Link>
                         <div className="flex min-w-0 flex-1 flex-col justify-between">
-                          <div className="flex items-start justify-between gap-2">
+                          <div className="flex items-start justify-between gap-3">
                             <div className="min-w-0">
                               <Link
                                 href={`/producto/${l.productId}`}
                                 onClick={() => setOpen(false)}
-                                className="font-display truncate text-sm uppercase"
+                                className="font-display block truncate text-base uppercase text-cream group-hover:text-accent"
                               >
                                 {l.product.name}
                               </Link>
-                              <p className="mt-0.5 text-xs text-sand">
+                              <p className="mt-1 text-sm text-sand">
                                 Talla {l.size} · {l.product.color}
                               </p>
                             </div>
                             <button
                               onClick={() => remove(l.productId, l.size)}
-                              className="shrink-0 rounded-full p-1.5 text-mute transition hover:bg-danger/15 hover:text-danger"
+                              className="shrink-0 rounded-full bg-noir/70 p-2 text-mute transition hover:bg-danger hover:text-noir"
                               aria-label="Eliminar"
                             >
-                              <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
                                 <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12ZM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4Z" />
                               </svg>
                             </button>
                           </div>
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center rounded-lg border border-line bg-noir/50">
+                          <div className="mt-3 flex items-center justify-between">
+                            <div className="flex items-center rounded-xl border-2 border-line bg-noir">
                               <button
                                 onClick={() => setQty(l.productId, l.size, l.qty - 1)}
-                                className="px-2.5 py-1 text-sand transition hover:text-accent"
+                                className="px-3 py-1.5 text-lg text-sand transition hover:text-accent"
                                 aria-label="Menos"
                               >
                                 −
                               </button>
-                              <span className="min-w-6 text-center text-sm font-semibold">{l.qty}</span>
+                              <span className="min-w-8 text-center text-base font-bold text-cream">{l.qty}</span>
                               <button
                                 onClick={() => setQty(l.productId, l.size, l.qty + 1)}
-                                className="px-2.5 py-1 text-sand transition hover:text-accent"
+                                className="px-3 py-1.5 text-lg text-sand transition hover:text-accent"
                                 aria-label="Más"
                               >
                                 +
                               </button>
                             </div>
                             <div className="text-right">
-                              <p className="font-display text-sm text-accent">
+                              <p className="font-display text-lg text-accent">
                                 {formatCOP(l.unit * l.qty)}
                               </p>
                               {l.saved > 0 && (
-                                <p className="text-[10px] text-mute line-through">
+                                <p className="text-xs text-mute line-through">
                                   {formatCOP(l.product.price * l.qty)}
                                 </p>
                               )}
@@ -219,33 +226,35 @@ export function CartDrawer() {
                     ))}
                   </AnimatePresence>
                 </div>
-                <div className="border-t border-line bg-noir/40 px-6 py-5">
-                  <div className="mb-3 space-y-1.5">
-                    <div className="flex items-center justify-between text-sm">
+                <div className="border-t-2 border-accent/40 bg-gradient-to-b from-noir to-coal px-7 py-6">
+                  <div className="mb-4 space-y-2">
+                    <div className="flex items-center justify-between text-base">
                       <span className="text-sand">Subtotal</span>
                       <span className="text-cream">{formatCOP(total + savings)}</span>
                     </div>
                     {savings > 0 && (
-                      <div className="flex items-center justify-between text-sm">
+                      <div className="flex items-center justify-between text-base">
                         <span className="text-sand">Descuento por volumen</span>
-                        <span className="font-semibold text-accent">−{formatCOP(savings)}</span>
+                        <span className="rounded-full bg-accent/15 px-2 py-0.5 font-semibold text-accent">
+                          −{formatCOP(savings)}
+                        </span>
                       </div>
                     )}
-                    <div className="flex items-center justify-between pt-1">
+                    <div className="flex items-baseline justify-between pt-2">
                       <span className="eyebrow">TOTAL</span>
-                      <span className="font-display text-2xl text-accent">{formatCOP(total)}</span>
+                      <span className="font-display text-3xl text-accent">{formatCOP(total)}</span>
                     </div>
                   </div>
                   <Link
                     href="/checkout"
                     onClick={() => setOpen(false)}
-                    className="btn-solid w-full"
+                    className="btn-solid w-full py-4 text-base"
                   >
                     FINALIZAR COMPRA →
                   </Link>
                   <button
                     onClick={() => setOpen(false)}
-                    className="mt-2.5 w-full text-center text-[11px] tracking-[0.2em] text-mute transition hover:text-cream"
+                    className="mt-3 w-full text-center text-xs tracking-[0.25em] text-mute transition hover:text-cream"
                   >
                     SEGUIR EXPLORANDO
                   </button>
