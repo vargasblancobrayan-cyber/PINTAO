@@ -1,0 +1,109 @@
+@import "tailwindcss";
+
+/*
+  PINTAO Noir — Design System
+  Escala oscura editorial: negro carbón, crema hueso, ámbar de acento.
+  Dark-first, móvil primero, tipografía display condensada.
+*/
+@theme {
+  --color-noir: #0a0a0a;
+  --color-coal: #121210;
+  --color-ash: #1c1c19;
+  --color-cream: #f5f1ea;
+  --color-sand: #a49c8b;
+  --color-mute: #6f6a5f;
+  --color-accent: #c9a227;
+  --color-accent-soft: #dfc268;
+  --color-danger: #e05c4d;
+  --color-line: rgba(245, 241, 234, 0.1);
+
+  --font-display: "Archivo", "Arial Narrow", sans-serif;
+  --font-body: "Inter", system-ui, sans-serif;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-fade-up: fade-up 0.7s var(--ease-out-expo) both;
+
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-noir text-cream font-body antialiased;
+}
+
+::selection {
+  background: var(--color-accent);
+  color: var(--color-noir);
+}
+
+/* ---------- Utilidades del sistema ---------- */
+
+.eyebrow {
+  @apply font-display text-[11px] tracking-[0.35em] uppercase text-sand;
+}
+
+.display-title {
+  @apply font-display uppercase leading-[0.92] tracking-tight;
+}
+
+.btn,
+.btn-solid,
+.btn-ghost,
+.btn-dark {
+  @apply inline-flex items-center justify-center gap-2 font-display uppercase tracking-[0.2em]
+    text-xs px-6 py-3.5 border transition-all duration-300 cursor-pointer select-none;
+}
+.btn-solid {
+  @apply bg-cream text-noir border-cream hover:bg-accent hover:border-accent hover:text-noir;
+}
+.btn-ghost {
+  @apply bg-transparent text-cream border-line hover:border-cream;
+}
+.btn-dark {
+  @apply bg-noir text-cream border-noir hover:bg-ash;
+}
+
+.container-x {
+  @apply mx-auto w-full max-w-[1440px] px-5 sm:px-8 lg:px-12;
+}
+
+.card-surface {
+  @apply bg-coal border border-line rounded-2xl;
+}
+
+.field {
+  @apply w-full bg-ash/60 border border-line rounded-lg px-4 py-3 text-sm text-cream
+    placeholder:text-mute outline-none transition-colors duration-200
+    focus:border-accent/60 focus:bg-ash;
+}
+
+.glass {
+  background: rgba(10, 10, 10, 0.55);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  border-bottom: 1px solid var(--color-line);
+}
+
+.text-balance {
+  text-wrap: balance;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
