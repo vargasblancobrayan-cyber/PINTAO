@@ -255,6 +255,77 @@ body{font-feature-settings:"ss01","cv01"; -webkit-font-smoothing:antialiased; te
 .cart-controls button:hover{background:var(--p-ink) !important; color:#fff}
 .shipping-progress b{background:linear-gradient(90deg,var(--p-ember),var(--p-gold)) !important}
 
+/* ───────── Cart drawer premium (estructura mejorada) ───────── */
+.cart-drawer{padding:34px 26px 26px !important; gap:0}
+.cart-drawer-head{display:flex; justify-content:space-between; align-items:flex-start; gap:14px; margin-bottom:16px}
+.cart-drawer-title-row{display:flex; align-items:center; gap:10px}
+#cartTitle{margin:4px 0 0 !important}
+.cart-count-chip{display:inline-grid; place-items:center; min-width:24px; height:24px; padding:0 6px; border-radius:var(--r-pill);
+  background:var(--p-ink); color:var(--p-paper); font-size:11px; font-weight:700}
+.drawer-close{top:14px !important; right:16px !important; width:38px; height:38px; display:grid; place-items:center;
+  border-radius:50% !important; background:var(--ground,transparent); color:var(--p-ink); font-size:22px; line-height:1;
+  transition:all var(--dur-2) var(--ease-out)}
+.drawer-close:hover{background:var(--p-ember); color:#fff; transform:rotate(90deg)}
+
+/* ───────── Tarjeta de descuento por volumen ───────── */
+.volume-card{background:linear-gradient(135deg,var(--p-ink),var(--p-ink-3)); color:var(--p-paper); border-radius:var(--r-lg);
+  padding:16px 18px 14px; margin-bottom:14px; box-shadow:var(--shadow-md); position:relative; overflow:hidden}
+.volume-card:before{content:""; position:absolute; right:-30px; top:-30px; width:120px; height:120px; border-radius:50%;
+  background:radial-gradient(circle,rgba(226,121,62,.4),transparent 65%)}
+.volume-card-label{display:block; font-size:8px; letter-spacing:1.6px; font-weight:700; color:var(--p-gold); margin-bottom:4px}
+.volume-card-rate{display:block; font:700 18px 'Manrope'; line-height:1.1}
+.volume-track{position:relative; margin:14px 0 6px}
+.volume-bar{display:block; height:7px; background:rgba(255,255,255,.16); border-radius:var(--r-pill); overflow:hidden}
+.volume-bar b{display:block; height:100%; width:0; border-radius:var(--r-pill);
+  background:linear-gradient(90deg,var(--p-ember),var(--p-gold)); transition:width .5s var(--ease-out)}
+.volume-marks{position:relative; display:flex; justify-content:space-between; margin-top:8px}
+.volume-marks span{position:relative; padding-top:18px; font-size:9px; color:rgba(244,237,225,.55); font-weight:600;
+  transition:color var(--dur-2) var(--ease-out)}
+.volume-marks span:before{content:""; position:absolute; left:50%; bottom:26px; top:-8px; width:2px; background:rgba(255,255,255,.22)}
+.volume-marks span.reached{color:var(--p-gold)}
+.volume-marks span.active{color:#fff}
+.volume-marks span.active:before{background:var(--p-gold); box-shadow:0 0 8px var(--p-gold)}
+.volume-copy{display:block; font-size:10px; color:rgba(244,237,225,.66); margin-top:8px}
+
+/* ───────── Items del carrito ───────── */
+.cart-items{padding-top:16px}
+.cart-item{grid-template-columns:76px 1fr auto; gap:14px; align-items:center; padding:12px;
+  background:var(--glass-light-2); border:1px solid var(--p-line); border-radius:var(--r-md); margin-bottom:12px;
+  transition:border-color var(--dur-2) var(--ease-out), box-shadow var(--dur-2) var(--ease-out)}
+.cart-item:hover{border-color:var(--p-line-strong); box-shadow:var(--shadow-sm)}
+.cart-item-media{position:relative}
+.cart-item-media img{width:76px; height:92px; object-fit:cover; display:block}
+.item-pct{position:absolute; left:-4px; top:-4px; background:var(--p-ember); color:#fff; font-size:9px; font-weight:800;
+  padding:3px 7px; border-radius:var(--r-pill); box-shadow:var(--shadow-sm)}
+.cart-item-body strong{font:600 13px 'Manrope'; line-height:1.25}
+.cart-item-variant{color:var(--p-mist); font-size:11px; display:block; margin:3px 0 8px}
+.cart-item-price{display:flex; flex-direction:column; align-items:flex-end; gap:2px}
+.cart-item-price strong{font-size:12px; white-space:nowrap}
+.cart-item-price s{color:var(--p-mist); font-size:10px}
+.cart-controls{border:1px solid var(--p-line); border-radius:var(--r-pill); padding:2px; display:inline-flex}
+.cart-controls button{border:0 !important; width:28px; height:26px; font-size:15px; cursor:pointer}
+.cart-controls b{min-width:22px; text-align:center; font-size:12px}
+.cart-remove{color:var(--p-red) !important; font-weight:700; text-transform:none !important}
+.cart-empty{color:var(--p-mist); padding:40px 10px}
+.cart-empty-icon{display:block; font-size:34px; margin-bottom:12px; animation:cEmpty 1s var(--ease-spring) both}
+
+/* ───────── Resumen premium ───────── */
+.cart-summary{padding-top:18px}
+.cart-summary .summary-row{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:9px}
+.cart-summary .summary-row span{font-size:11px; color:var(--p-mist)}
+.cart-summary .summary-row strong{font:700 14px 'Manrope'}
+.cart-summary .summary-row.grand{background:var(--p-paper-2); border-radius:var(--r-md); padding:12px 14px;
+  border:1px solid var(--p-line); margin-bottom:12px}
+.cart-summary .summary-row.grand strong{font-size:17px}
+.cart-summary .discount-row strong{color:var(--p-green)}
+.cart-summary small{font-size:10px}
+.cart-summary .button{margin-top:6px; border-radius:var(--r-sm); min-height:54px;
+  background:linear-gradient(135deg,var(--p-ink),var(--p-ink-3)) !important; border-color:transparent !important;
+  box-shadow:var(--shadow-md); transition:all var(--dur-2) var(--ease-out)}
+.cart-summary .button:hover{transform:translateY(-2px); box-shadow:var(--glow-ember); background:linear-gradient(135deg,var(--p-ember),var(--p-ember-soft)) !important}
+@keyframes cEmpty{from{transform:scale(.6); opacity:0}to{transform:scale(1); opacity:1}}
+@media(prefers-reduced-motion:reduce){.volume-bar b{transition:none}.cart-empty-icon{animation:none}.drawer-close{transition:none}}
+
 /* ───────── Search strip glass ───────── */
 .search-strip{background:var(--glass-light) !important; -webkit-backdrop-filter:blur(24px) saturate(150%);
   backdrop-filter:blur(24px) saturate(150%); border-bottom:1px solid var(--glass-border) !important}

@@ -20,6 +20,7 @@
 - Tailwind v4: `@apply` no puede referenciar clases custom definidas en el mismo archivo (usar selectores combinados).
 - El store en memoria (`web/src/lib/server-store.ts`) es la capa única para rutas API; el reemplazo por Supabase está documentado en `web/README.md`.
 - Carrito (`web/src/components/cart-drawer.tsx`): los `color` de producto son nombres en español (no hex); usa `COLOR_SWATCH` para los chips de color. Microinteracciones Framer Motion respetan `prefers-reduced-motion`.
+- La tienda DESPLEGADA en Vercel es la **legacy** (raíz: `index.html` + `shop.js` + `shop.css` + `premium.css`), no `web/`. Mejoras visibles del carrito van en el inject de `shop.js` (markup `cart-drawer`) + estilos aditivos en `premium.css` (tokens `--p-*`). Expuesto en `window.Punto` (`Punto.add`, `Punto.money`, etc.) y el `cart` se lee de `localStorage['pintao-cart']`.
 
 ## Verificación rápida del preview del carrito
 - Precarga del carrito demo en localStorage: clave `pintao-cart` con `[{"productId":1,"size":"M","qty":12}]` para ver el descuento por volumen activo en el drawer.
