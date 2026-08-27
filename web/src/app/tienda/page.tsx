@@ -1,7 +1,7 @@
 import { getActiveProducts, categories, colors, allSizes } from "@/lib/products";
 import { Storefront } from "@/components/storefront";
 
-export const metadata = { title: "Tienda — PINTAO" };
+export const metadata = { title: "Tienda" };
 
 export default async function TiendaPage({
   searchParams,

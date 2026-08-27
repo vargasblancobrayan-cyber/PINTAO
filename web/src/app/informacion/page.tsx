@@ -1,6 +1,6 @@
 import { Reveal } from "@/components/motion";
 
-export const metadata = { title: "Información — PINTAO" };
+export const metadata = { title: "Información" };
 
 const sections = [
   {
