@@ -19,4 +19,3 @@
 
 - Tailwind v4: `@apply` no puede referenciar clases custom definidas en el mismo archivo (usar selectores combinados).
 - El store en memoria (`web/src/lib/server-store.ts`) es la capa única para rutas API; el reemplazo por Supabase está documentado en `web/README.md`.
-- El token de GitHub disponible en el sandbox fue solo-lectura para este repo (push/PR via API → 403). Para empujar cambios se requiere PAT con `contents:write` o rama local del usuario.
