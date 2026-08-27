@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const $ = s => document.querySelector(s);
   const roleBtns = document.querySelectorAll('[data-role]');
   const form = $('#accessForm');
-  const submit = $('#accessSubmit');
+  const fieldsWrap = $('#accessFields');
   const error = $('#accessError');
   const toggleBtn = $('#toggleMode');
   const toggleText = $('#toggleText');
@@ -32,6 +32,21 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // Reconstruye los campos del formulario según el modo.
+  // Login (por defecto): solo correo + contraseña. Registro: añade nombre y tipo.
+  function renderFields() {
+    const isLogin = mode === 'login';
+    const extra = isLogin ? '' :
+      '<label class="field wide">NOMBRE O EMPRESA<input name="name" autocomplete="name" required></label>' +
+      '<label class="field wide">TIPO DE COMPRADOR<select name="type"><option>Persona natural</option><option>Empresa</option></select></label>';
+    fieldsWrap.innerHTML = extra +
+      '<label class="field wide">CORREO ELECTRÓNICO<input name="email" type="email" autocomplete="email" required></label>' +
+      '<label class="field wide">CONTRASEÑA<input name="password" type="password" minlength="8" autocomplete="' +
+      (isLogin ? 'current-password' : 'new-password') + '" required></label>' +
+      '<div class="field wide access-actions"><button class="button dark full" type="submit" id="accessSubmit">' +
+      (role === 'admin' ? 'ENTRAR AL PANEL' : (isLogin ? 'INGRESAR' : 'CREAR CUENTA')) + '</button></div>';
+  }
+
   function applyRole(next) {
     role = next;
     roleBtns.forEach(b => {
@@ -39,31 +54,28 @@ document.addEventListener('DOMContentLoaded', () => {
       b.classList.toggle('active', on);
       b.setAttribute('aria-selected', String(on));
     });
-    // El admin solo inicia sesión (no se crea cuenta desde aquí).
     if (role === 'admin') setMode('login', true);
-    $('#accessEyebrow').textContent = role === 'admin' ? 'ACCESO ADMINISTRATIVO' : 'INICIAR SESIÓN';
-    $('#accessTitle').textContent = role === 'admin' ? 'Acceso administrador' : (mode === 'login' ? 'Acceso cliente' : 'Crear cuenta de cliente');
-    $('#accessHint').textContent = role === 'admin'
-      ? 'Área protegida para gestionar productos, pedidos y configuración.'
-      : (mode === 'login' ? 'Ingresa con tu cuenta de comprador PINTAO.' : 'Registra tu cuenta para comprar y seguir tus pedidos.');
+    updateCopy();
     renderDemo();
+  }
+
+  function updateCopy() {
+    const isLogin = mode === 'login';
+    $('#accessEyebrow').textContent = role === 'admin' ? 'ACCESO ADMINISTRATIVO' : (isLogin ? 'INICIAR SESIÓN' : 'REGISTRO');
+    $('#accessTitle').textContent = role === 'admin' ? 'Acceso administrador' : (isLogin ? 'Acceso cliente' : 'Crear cuenta');
+    $('#accessHint').textContent = role === 'admin'
+      ? 'Ingresa tu correo y contraseña de administrador.'
+      : (isLogin ? 'Ingresa con tu correo y contraseña.' : 'Completa tus datos para crear una cuenta de comprador.');
+    toggleText.textContent = isLogin ? '¿No tienes cuenta?' : '¿Ya tienes cuenta?';
+    toggleBtn.textContent = isLogin ? 'CREAR CUENTA' : 'INICIAR SESIÓN';
+    toggleBtn.hidden = role === 'admin';
   }
 
   function setMode(next, force) {
     if (role === 'admin' && !force) return;
     mode = next;
-    const isLogin = mode === 'login';
-    $('#nameField').hidden = isLogin;
-    $('#typeField').hidden = isLogin;
-    form.elements.password.autocomplete = isLogin ? 'current-password' : 'new-password';
-    submit.textContent = role === 'admin' ? 'ENTRAR AL PANEL' : (isLogin ? 'INGRESAR' : 'CREAR CUENTA');
-    toggleText.textContent = isLogin ? '¿No tienes cuenta?' : '¿Ya tienes cuenta?';
-    toggleBtn.textContent = isLogin ? 'CREAR CUENTA' : 'INICIAR SESIÓN';
-    toggleBtn.hidden = role === 'admin';
-    $('#accessTitle').textContent = role === 'admin' ? 'Acceso administrador' : (isLogin ? 'Acceso cliente' : 'Crear cuenta de cliente');
-    $('#accessHint').textContent = role === 'admin'
-      ? 'Área protegida para gestionar productos, pedidos y configuración.'
-      : (isLogin ? 'Ingresa con tu cuenta de comprador PINTAO.' : 'Registra tu cuenta para comprar y seguir tus pedidos.');
+    renderFields();
+    updateCopy();
     error.textContent = '';
   }
 
@@ -73,9 +85,10 @@ document.addEventListener('DOMContentLoaded', () => {
   form.addEventListener('submit', async e => {
     e.preventDefault();
     error.textContent = '';
-    submit.disabled = true;
-    const original = submit.textContent;
-    submit.textContent = 'PROCESANDO…';
+    const btn = form.querySelector('#accessSubmit');
+    btn.disabled = true;
+    const original = btn.textContent;
+    btn.textContent = 'PROCESANDO…';
     const values = Object.fromEntries(new FormData(form));
     try {
       if (role === 'admin') {
@@ -94,11 +107,13 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     } catch (err) {
       error.textContent = err.message || 'Ocurrió un error. Intenta nuevamente.';
-      submit.disabled = false;
-      submit.textContent = original;
+      btn.disabled = false;
+      btn.textContent = original;
     }
   });
 
-  applyRole('customer');
+  renderFields();
+  updateCopy();
+  renderDemo();
   redirectIfSession();
 });
