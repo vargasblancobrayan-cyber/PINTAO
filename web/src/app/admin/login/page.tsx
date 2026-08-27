@@ -1,6 +1,6 @@
 import { AuthForm } from "@/components/auth-form";
 
-export const metadata = { title: "Admin — PINTAO" };
+export const metadata = { title: "Admin" };
 
 export default function AdminLoginPage() {
   return (

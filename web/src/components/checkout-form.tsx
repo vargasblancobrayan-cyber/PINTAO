@@ -6,6 +6,7 @@ import { useMemo, useState } from "react";
 import { useCart } from "./providers";
 import { products } from "@/lib/products";
 import { formatCOP, unitPriceWithDiscount } from "@/lib/format";
+import { computePricing, COUPONS, FREE_SHIPPING_THRESHOLD, FLAT_SHIPPING_COP } from "@/lib/pricing";
 
 export function CheckoutForm() {
   const router = useRouter();
@@ -13,6 +14,8 @@ export function CheckoutForm() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState<string | null>(null);
+  const [couponCode, setCouponCode] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState<string | undefined>(undefined);
 
   const totalQty = items.reduce((n, i) => n + i.qty, 0);
   const summary = useMemo(
@@ -27,7 +30,15 @@ export function CheckoutForm() {
     [items, totalQty],
   );
 
-  const total = summary.reduce((sum, l) => sum + l.unit * l.qty, 0);
+  const subtotal = summary.reduce((sum, l) => sum + l.product.price * l.qty, 0);
+  const pricing = computePricing({ subtotal, totalQty, couponCode: appliedCoupon });
+  const total = pricing.total;
+
+  const applyCoupon = () => {
+    const code = couponCode.trim().toUpperCase();
+    if (COUPONS[code]) setAppliedCoupon(code);
+    else setAppliedCoupon(undefined);
+  };
 
   async function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -48,10 +59,8 @@ export function CheckoutForm() {
           productId: l.productId,
           size: l.size,
           qty: l.qty,
-          name: l.product.name,
-          unitPrice: l.unit,
         })),
-        total,
+        coupon: appliedCoupon,
       }),
     });
     setLoading(false);
@@ -135,12 +144,60 @@ export function CheckoutForm() {
             </div>
           ))}
         </div>
-        <div className="mt-6 border-t border-line pt-4">
-          <div className="flex justify-between text-sm">
-            <span className="text-sand">Total ({totalQty} und.)</span>
-            <span className="font-display text-lg text-accent">{formatCOP(total)}</span>
+
+        {/* Cupón */}
+        <div className="mt-5 flex gap-2">
+          <input
+            value={couponCode}
+            onChange={(e) => setCouponCode(e.target.value)}
+            placeholder="Cupón"
+            aria-label="Código de cupón"
+            className="field !py-2 text-xs uppercase tracking-wider placeholder:normal-case"
+          />
+          <button
+            onClick={applyCoupon}
+            className="shrink-0 rounded-lg border border-accent/40 bg-accent/10 px-3 font-display text-[11px] tracking-widest text-accent transition hover:bg-accent hover:text-noir"
+          >
+            APLICAR
+          </button>
+        </div>
+
+        <div className="mt-6 border-t border-line pt-4 text-sm">
+          <div className="flex justify-between">
+            <span className="text-sand">Subtotal</span>
+            <span>{formatCOP(subtotal)}</span>
           </div>
-          <p className="mt-2 text-xs text-mute">
+          {pricing.volumeDiscount > 0 && (
+            <div className="mt-1 flex justify-between">
+              <span className="text-sand">Descuento por volumen</span>
+              <span className="font-semibold text-accent">−{formatCOP(pricing.volumeDiscount)}</span>
+            </div>
+          )}
+          {pricing.couponDiscount > 0 && (
+            <div className="mt-1 flex justify-between">
+              <span className="text-sand">Cupón {appliedCoupon}</span>
+              <span className="font-semibold text-accent">−{formatCOP(pricing.couponDiscount)}</span>
+            </div>
+          )}
+          <div className="mt-1 flex justify-between">
+            <span className="text-sand">Envío</span>
+            <span className={pricing.freeShipping ? "font-semibold text-accent" : ""}>
+              {pricing.freeShipping ? `GRATIS` : formatCOP(FLAT_SHIPPING_COP)}
+            </span>
+          </div>
+          <div className="mt-3 flex items-center justify-between border-t border-line pt-3">
+            <span className="eyebrow">TOTAL</span>
+            <span className="font-display text-xl text-accent">{formatCOP(total)}</span>
+          </div>
+          {!pricing.freeShipping ? (
+            <p className="mt-2 text-xs text-mute">
+              Envío gratis desde {formatCOP(FREE_SHIPPING_THRESHOLD)}. Te faltan{" "}
+              {formatCOP(Math.max(0, FREE_SHIPPING_THRESHOLD - pricing.afterCoupon))}.
+            </p>
+          ) : (
+            <p className="mt-2 text-xs text-accent">✓ Envío gratis aplicado</p>
+          )}
+          <p className="mt-3 text-xs text-mute">
             El checkout registra una solicitud pendiente de confirmación; no simula un cobro.
           </p>
         </div>

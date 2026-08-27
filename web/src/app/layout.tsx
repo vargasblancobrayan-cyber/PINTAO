@@ -10,8 +10,27 @@ const archivo = Archivo({ subsets: ["latin"], variable: "--font-archivo", weight
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 export const metadata: Metadata = {
-  title: "PINTAO — Streetwear Colombia",
-  description: "La pinta habla primero. Básicos, oversize, denim y accesorios hechos pa' salir.",
+  metadataBase: new URL("https://pintao-store.vercel.app"),
+  title: {
+    default: "PINTAO — Streetwear Colombia",
+    template: "%s — PINTAO",
+  },
+  description:
+    "La pinta habla primero. Básicos, oversize, denim y accesorios hechos pa' salir. Envíos a toda Colombia y descuentos por volumen.",
+  keywords: ["streetwear", "colombia", "PINTAO", "gorras", "jeans", "oversize", "moda urbana"],
+  openGraph: {
+    title: "PINTAO — Streetwear Colombia",
+    description: "La pinta habla primero. Hecho pa' salir.",
+    url: "https://pintao-store.vercel.app",
+    siteName: "PINTAO",
+    locale: "es_CO",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "PINTAO — Streetwear Colombia",
+    description: "La pinta habla primero. Hecho pa' salir.",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

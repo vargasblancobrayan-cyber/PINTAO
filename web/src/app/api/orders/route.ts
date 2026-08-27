@@ -2,32 +2,65 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { addOrder, getSession, getCustomerOrders } from "@/lib/server-store";
 import type { Order, OrderItem } from "@/lib/types";
+import { orderInputSchema } from "@/lib/validation";
+import { computePricing } from "@/lib/pricing";
+import { unitPriceWithDiscount } from "@/lib/format";
+import { products } from "@/lib/products";
 
 export const runtime = "nodejs";
 
 export async function POST(req: Request) {
-  const body = await req.json();
-  const { customer, items, total, paymentMethod } = body as {
-    customer: { name: string; email: string; phone: string };
-    items: OrderItem[];
-    total: number;
-    paymentMethod: string;
-  };
-
-  if (!customer?.name || !customer?.email || !customer?.phone || !items?.length) {
-    return NextResponse.json({ error: "Datos del pedido incompletos" }, { status: 400 });
+  let body: unknown;
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ error: "JSON inválido" }, { status: 400 });
   }
+
+  const parsed = orderInputSchema.safeParse(body);
+  if (!parsed.success) {
+    const msg = parsed.error.issues[0]?.message ?? "Datos del pedido inválidos";
+    return NextResponse.json({ error: msg }, { status: 400 });
+  }
+  const { customer, items, paymentMethod, coupon } = parsed.data;
+
+  // Recalcular precios y totales en el servidor (nunca confiar en datos del cliente).
+  const totalQty = items.reduce((n, i) => n + i.qty, 0);
+  let subtotal = 0;
+  const orderItems: OrderItem[] = [];
+  for (const { productId, size, qty } of items) {
+    const product = products.find((p) => p.id === productId && p.active);
+    const variant = product?.variants.find((v) => v.size === size);
+    if (!product || !variant || variant.stock < qty) {
+      return NextResponse.json(
+        { error: `Stock insuficiente para ${product?.name ?? "un producto"}` },
+        { status: 400 },
+      );
+    }
+    const unit = unitPriceWithDiscount(product.price, totalQty);
+    subtotal += product.price * qty;
+    orderItems.push({
+      productId,
+      name: product.name,
+      size,
+      qty,
+      unitPrice: unit,
+    });
+  }
+
+  const pricing = computePricing({ subtotal, totalQty, couponCode: coupon });
 
   const order: Order = {
     id: `PNT-${Date.now().toString(36).toUpperCase()}`,
-    customer: {
-      name: String(customer.name).slice(0, 80),
-      email: String(customer.email).toLowerCase().trim(),
-      phone: String(customer.phone).replace(/\D/g, "").slice(0, 20),
-    },
-    items,
-    total: Number(total) || 0,
-    paymentMethod: String(paymentMethod ?? "Transferencia"),
+    customer,
+    items: orderItems,
+    subtotal,
+    volumeDiscount: pricing.volumeDiscount,
+    coupon: pricing.coupon?.code,
+    couponDiscount: pricing.couponDiscount,
+    shipping: pricing.shipping,
+    total: pricing.total,
+    paymentMethod,
     status: "Pendiente de confirmación",
     createdAt: new Date().toISOString(),
   };

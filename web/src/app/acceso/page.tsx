@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { AuthForm } from "@/components/auth-form";
 
-export const metadata = { title: "Acceso — PINTAO" };
+export const metadata = { title: "Acceso" };
 
 export default function AccesoPage() {
   return (

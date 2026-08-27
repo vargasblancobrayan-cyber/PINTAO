@@ -8,7 +8,20 @@ import { Reveal } from "@/components/motion";
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const product = getProduct(Number(id));
-  return { title: product ? `${product.name} — PINTAO` : "Producto no encontrado" };
+  if (!product) return { title: "Producto no encontrado" };
+  const description = `${product.name} · ${product.category} ${product.color}. ${product.description} Envíos a toda Colombia y descuentos por volumen desde 12 unidades.`;
+  return {
+    title: product.name,
+    description: description.slice(0, 160),
+    openGraph: {
+      title: `${product.name} — PINTAO`,
+      description,
+      images: [{ url: product.img, alt: product.name }],
+      locale: "es_CO",
+      type: "website",
+    },
+    alternates: { canonical: `/producto/${product.id}` },
+  };
 }
 
 export function generateStaticParams() {
@@ -22,9 +35,31 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
 
   const suggestions = recommend(product, getActiveProducts(), 4);
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.name,
+    image: product.gallery,
+    description: product.description,
+    category: product.category,
+    offers: {
+      "@type": "AggregateOffer",
+      priceCurrency: "COP",
+      lowPrice: product.price,
+      highPrice: product.price * (1 + 0.2),
+      offerCount: product.variants.length,
+      availability: "https://schema.org/InStock",
+    },
+  };
+
   return (
-    <div className="container-x py-12 sm:py-16">
-      <ProductDetail product={product} />
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <div className="container-x py-12 sm:py-16">
+        <ProductDetail product={product} />
       <section className="mt-20">
         <Reveal>
           <p className="eyebrow mb-2">COMPLETA TU PINTA</p>
@@ -38,6 +73,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
           ))}
         </div>
       </section>
-    </div>
+      </div>
+    </>
   );
 }

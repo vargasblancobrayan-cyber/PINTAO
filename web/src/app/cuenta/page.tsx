@@ -1,6 +1,6 @@
 import { AccountPanel } from "@/components/account-panel";
 
-export const metadata = { title: "Mi cuenta — PINTAO" };
+export const metadata = { title: "Mi cuenta" };
 
 export default function CuentaPage() {
   return (

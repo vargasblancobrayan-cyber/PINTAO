@@ -1,6 +1,6 @@
 import { AdminPanel } from "@/components/admin-panel";
 
-export const metadata = { title: "Panel — PINTAO Admin" };
+export const metadata = { title: "Panel" };
 
 export default function AdminPage() {
   return (

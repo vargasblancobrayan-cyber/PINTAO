@@ -2,10 +2,17 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useCart } from "./providers";
 import { products } from "@/lib/products";
 import { formatCOP, unitPriceWithDiscount, volumeDiscount } from "@/lib/format";
+import {
+  computePricing,
+  COUPONS,
+  FREE_SHIPPING_THRESHOLD,
+  FLAT_SHIPPING_COP,
+} from "@/lib/pricing";
 
 const TIERS = [
   { qty: 12, discount: 0.08 },
@@ -103,6 +110,9 @@ function DiscountProgress({ count }: { count: number }) {
 export function CartDrawer() {
   const { items, open, setOpen, setQty, remove } = useCart();
   const reduce = useReducedMotion();
+  const [couponCode, setCouponCode] = useState("");
+  const [couponMsg, setCouponMsg] = useState<{ ok: boolean; text: string } | null>(null);
+  const [appliedCoupon, setAppliedCoupon] = useState<string | undefined>(undefined);
 
   const count = items.reduce((n, i) => n + i.qty, 0);
   const lines = items
@@ -122,8 +132,23 @@ export function CartDrawer() {
     saved: number;
   }>;
 
-  const total = lines.reduce((sum, l) => sum + l.unit * l.qty, 0);
+  const subtotal = lines.reduce((sum, l) => sum + l.product.price * l.qty, 0);
   const savings = lines.reduce((sum, l) => sum + l.saved * l.qty, 0);
+
+  const pricing = computePricing({ subtotal, totalQty: count, couponCode: appliedCoupon });
+  const shipping = pricing.shipping;
+  const couponDiscount = pricing.couponDiscount;
+
+  const applyCoupon = () => {
+    const code = couponCode.trim().toUpperCase();
+    if (COUPONS[code]) {
+      setAppliedCoupon(code);
+      setCouponMsg({ ok: true, text: `✓ Cupón ${code} aplicado (-${COUPONS[code] * 100}%)` });
+    } else {
+      setAppliedCoupon(undefined);
+      setCouponMsg({ ok: false, text: "Código no válido. Prueba PINTAO10 o DROP01." });
+    }
+  };
 
   return (
     <AnimatePresence>
@@ -317,9 +342,43 @@ export function CartDrawer() {
                   </AnimatePresence>
                 </div>
                 <div className="border-t-2 border-accent/40 bg-gradient-to-b from-noir to-coal px-7 pt-5 pb-7">
+                  {/* Cupón promocional */}
+                  <div className="mb-4 flex gap-2">
+                    <div className="relative flex-1">
+                      <input
+                        value={couponCode}
+                        onChange={(e) => setCouponCode(e.target.value)}
+                        onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), applyCoupon())}
+                        placeholder="Cupón (p. ej. PINTAO10)"
+                        aria-label="Código de cupón"
+                        className="field !py-2.5 text-xs uppercase tracking-wider placeholder:normal-case"
+                      />
+                    </div>
+                    <button
+                      onClick={applyCoupon}
+                      className="shrink-0 self-stretch rounded-lg border border-accent/40 bg-accent/10 px-4 font-display text-[11px] tracking-widest text-accent transition hover:bg-accent hover:text-noir"
+                    >
+                      APLICAR
+                    </button>
+                  </div>
+                  {couponMsg && (
+                    <p
+                      className={`mb-3 text-xs ${couponMsg.ok ? "text-accent" : "text-danger"}`}
+                      role="status"
+                      aria-live="polite"
+                    >
+                      {couponMsg.text}
+                    </p>
+                  )}
+                  {pricing.freeShipping && (
+                    <div className="mb-4 flex items-center gap-2 rounded-lg border border-accent/30 bg-accent/10 px-3 py-2 text-xs text-accent">
+                      <span>🚚</span> Envío gratis por superar {formatCOP(FREE_SHIPPING_THRESHOLD)}
+                    </div>
+                  )}
+
                   <div className="mb-1 flex items-center justify-between text-sm">
                     <span className="text-sand">Subtotal</span>
-                    <span className="text-cream">{formatCOP(total + savings)}</span>
+                    <span className="text-cream">{formatCOP(subtotal)}</span>
                   </div>
                   {savings > 0 && (
                     <div className="flex items-center justify-between text-sm">
@@ -329,22 +388,41 @@ export function CartDrawer() {
                       </span>
                     </div>
                   )}
+                  {couponDiscount > 0 && (
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-sand">
+                        Cupón {appliedCoupon} (-{(pricing.coupon?.rate ?? 0) * 100}%)
+                      </span>
+                      <span className="rounded-md bg-accent/15 px-2 py-0.5 font-semibold text-accent">
+                        −{formatCOP(couponDiscount)}
+                      </span>
+                    </div>
+                  )}
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-sand">Envío</span>
+                    <span className={shipping === 0 ? "font-semibold text-accent" : "text-cream"}>
+                      {shipping === 0 ? "GRATIS" : formatCOP(shipping)}
+                    </span>
+                  </div>
                   <div className="mt-4 flex items-end justify-between gap-4 border-t border-line pt-4">
                     <span className="eyebrow">TOTAL</span>
                     <div className="text-right">
-                      {savings > 0 && (
-                        <p className="text-xs text-mute line-through">
-                          {formatCOP(total + savings)}
-                        </p>
+                      {pricing.afterCoupon + shipping < subtotal && (
+                        <p className="text-xs text-mute line-through">{formatCOP(subtotal)}</p>
                       )}
                       <span className="font-display text-3xl leading-none text-accent">
-                        {formatCOP(total)}
+                        {formatCOP(pricing.total)}
                       </span>
                       <p className="mt-1 text-[10px] tracking-[0.18em] text-mute">
                         IVA INCLUIDO
                       </p>
                     </div>
                   </div>
+                  <p className="mt-3 text-[10px] tracking-[0.15em] text-mute">
+                    Sin envío gratis en carrito: {formatCOP(FLAT_SHIPPING_COP)}. Súmale{" "}
+                    {formatCOP(Math.max(0, FREE_SHIPPING_THRESHOLD - pricing.afterCoupon))} para
+                    envío gratis.
+                  </p>
                   <Link
                     href="/checkout"
                     onClick={() => setOpen(false)}

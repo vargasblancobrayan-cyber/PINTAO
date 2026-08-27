@@ -15,6 +15,8 @@ export interface Product {
   sizes: string[];
   stock: number;
   img: string;
+  /** Galería multi-imagen del producto (la primera es la principal). */
+  gallery: string[];
   description: string;
   variants: Variant[];
   tag: "NUEVO" | "DESTACADO";
@@ -39,6 +41,11 @@ export interface Order {
   id: string;
   customer: { name: string; email: string; phone: string };
   items: OrderItem[];
+  subtotal: number;
+  volumeDiscount: number;
+  coupon?: string;
+  couponDiscount: number;
+  shipping: number;
   total: number;
   paymentMethod: string;
   status: string;
