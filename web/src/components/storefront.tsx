@@ -1,14 +1,27 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Product } from "@/lib/types";
 import { ProductCard } from "./product-card";
+
+/** Tarjeta fantasma para el skeleton loading de la grilla. */
+function SkeletonCard() {
+  return (
+    <div className="animate-pulse" aria-hidden>
+      <div className="aspect-[4/5] w-full rounded-2xl bg-ash/70" />
+      <div className="mt-3 h-3 w-1/3 rounded bg-ash/70" />
+      <div className="mt-2 h-4 w-3/4 rounded bg-ash/60" />
+      <div className="mt-2 h-3 w-1/4 rounded bg-ash/60" />
+    </div>
+  );
+}
 
 interface Filters {
   query: string;
   category: string;
   color: string;
   size: string;
+  availability: "" | "in" | "out";
   sort: string;
   minPrice: number;
   maxPrice: number;
@@ -24,6 +37,8 @@ function match(p: Product, f: Filters): boolean {
   if (f.color && p.color !== f.color) return false;
   if (f.size && !p.sizes.includes(f.size)) return false;
   if (p.price < f.minPrice || p.price > f.maxPrice) return false;
+  if (f.availability === "in" && p.stock <= 0) return false;
+  if (f.availability === "out" && p.stock > 0) return false;
   return true;
 }
 
@@ -35,7 +50,7 @@ function sortProducts(list: Product[], sort: string): Product[] {
     case "precio-desc":
       return l.sort((a, b) => b.price - a.price);
     case "nuevos":
-      return l.sort((a, b) => (a.tag === "NUEVO" ? -1 : 1) - (b.tag === "NUEVO" ? -1 : 1));
+      return l.sort((a, b) => (b.tag === "NUEVO" ? 1 : 0) - (a.tag === "NUEVO" ? 1 : 0));
     default:
       return l.sort((a, b) => a.id - b.id);
   }
@@ -61,17 +76,43 @@ export function Storefront({
     category: initialCategory ?? "",
     color: "",
     size: "",
+    availability: "",
     sort: initialSort ?? "relevance",
     minPrice: 0,
     maxPrice: 200000,
   });
+  const [loading, setLoading] = useState(false);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const results = useMemo(
     () => sortProducts(products.filter((p) => match(p, filters)), filters.sort),
     [products, filters],
   );
 
-  const update = (patch: Partial<Filters>) => setFilters((f) => ({ ...f, ...patch }));
+  // Micro-interacción: pequeño flash de skeleton al cambiar filtros (UX premium).
+  const update = useCallback((patch: Partial<Filters>) => {
+    if (timer.current) clearTimeout(timer.current);
+    setLoading(true);
+    timer.current = setTimeout(() => {
+      setFilters((f) => ({ ...f, ...patch }));
+      setLoading(false);
+    }, 280);
+  }, []);
+
+  useEffect(() => () => {
+    if (timer.current) clearTimeout(timer.current);
+  }, []);
+
+  const clear = () => {
+    if (timer.current) clearTimeout(timer.current);
+    setFilters({ query: "", category: "", color: "", size: "", availability: "", sort: "relevance", minPrice: 0, maxPrice: 200000 });
+    setLoading(false);
+  };
+
+  const inStockCount = useMemo(
+    () => products.filter((p) => p.stock > 0).length,
+    [products],
+  );
 
   return (
     <div className="grid gap-10 lg:grid-cols-[240px_1fr]">
@@ -119,6 +160,14 @@ export function Storefront({
           </select>
         </div>
         <div>
+          <label className="eyebrow mb-2 block">DISPONIBILIDAD</label>
+          <select className="field" value={filters.availability} onChange={(e) => update({ availability: e.target.value as Filters["availability"] })}>
+            <option value="">Todas</option>
+            <option value="in">En stock</option>
+            <option value="out">Agotado</option>
+          </select>
+        </div>
+        <div>
           <label className="eyebrow mb-2 block">PRECIO MÁX · {filters.maxPrice.toLocaleString("es-CO")}</label>
           <input
             type="range"
@@ -144,25 +193,41 @@ export function Storefront({
 
       {/* Resultados */}
       <div>
-        <p className="mb-6 eyebrow" aria-live="polite">
-          {results.length} {results.length === 1 ? "PRENDA" : "PRENDAS"}
-        </p>
-        {results.length === 0 ? (
+        {loading ? (
+          <>
+            <p className="mb-6 eyebrow">FILTRANDO…</p>
+            <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3" aria-busy="true">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <SkeletonCard key={i} />
+              ))}
+            </div>
+          </>
+        ) : results.length === 0 ? (
           <div className="card-surface flex flex-col items-center gap-3 p-12 text-center">
             <p className="font-display text-xl uppercase">Sin resultados</p>
             <p className="max-w-sm text-sm text-sand">
               Ajusta los filtros o busca otra vibra. El drop está lleno de opciones.
             </p>
-            <button className="btn-solid mt-2" onClick={() => setFilters({ query: "", category: "", color: "", size: "", sort: "relevance", minPrice: 0, maxPrice: 200000 })}>
+            <button className="btn-solid mt-2" onClick={clear}>
               LIMPIAR FILTROS
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3">
-            {results.map((p) => (
-              <ProductCard key={p.id} product={p} />
-            ))}
-          </div>
+          <>
+            <p className="mb-6 eyebrow" aria-live="polite">
+              {results.length} {results.length === 1 ? "PRENDA" : "PRENDAS"}
+              {filters.availability !== "out" && (
+                <span className="ml-3 text-mute">
+                  · {inStockCount} en stock
+                </span>
+              )}
+            </p>
+            <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3">
+              {results.map((p) => (
+                <ProductCard key={p.id} product={p} />
+              ))}
+            </div>
+          </>
         )}
       </div>
     </div>
