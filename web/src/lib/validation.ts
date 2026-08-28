@@ -12,7 +12,19 @@ export const orderInputSchema = z.object({
       .transform((v) => v.replace(/\D/g, ""))
       .refine((v) => v.length >= 7 && v.length <= 20, "WhatsApp inválido"),
   }),
-  paymentMethod: z.string().trim().max(60).default("Transferencia"),
+  paymentMethod: z
+    .enum(["Transferencia", "Enlace de pago", "PSE", "Contraentrega"])
+    .default("Transferencia"),
+  shippingMethod: z.enum(["recoge", "envio", "expreso"]).default("envio"),
+  address: z
+    .object({
+      line1: z.string().trim().min(4, "Dirección muy corta").max(120),
+      line2: z.string().trim().max(120).optional(),
+      city: z.string().trim().min(2, "Ciudad requerida").max(80),
+      region: z.string().trim().min(2, "Departamento requerido").max(80),
+      postalCode: z.string().trim().max(12).optional(),
+    })
+    .optional(),
   items: z
     .array(
       z.object({

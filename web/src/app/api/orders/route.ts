@@ -6,10 +6,26 @@ import { orderInputSchema } from "@/lib/validation";
 import { computePricing } from "@/lib/pricing";
 import { unitPriceWithDiscount } from "@/lib/format";
 import { products } from "@/lib/products";
+import { checkRateLimit, clientIp } from "@/lib/rate-limit";
+import { assertSameOrigin } from "@/lib/csrf";
 
 export const runtime = "nodejs";
 
+const ORDER_RATE_LIMIT = { windowMs: 60_000, max: 10 };
+
 export async function POST(req: Request) {
+  const csrf = assertSameOrigin(req);
+  if (csrf) return csrf;
+
+  const ip = clientIp(req);
+  const limited = checkRateLimit(`order:${ip}`, ORDER_RATE_LIMIT);
+  if (!limited.ok) {
+    return NextResponse.json(
+      { error: "Demasiados pedidos. Espera un momento e inténtalo de nuevo." },
+      { status: 429, headers: { "Retry-After": String(Math.ceil((limited.retryAfterMs ?? 60_000) / 1000)) } },
+    );
+  }
+
   let body: unknown;
   try {
     body = await req.json();
@@ -22,7 +38,14 @@ export async function POST(req: Request) {
     const msg = parsed.error.issues[0]?.message ?? "Datos del pedido inválidos";
     return NextResponse.json({ error: msg }, { status: 400 });
   }
-  const { customer, items, paymentMethod, coupon } = parsed.data;
+  const { customer, items, paymentMethod, shippingMethod, address, coupon } = parsed.data;
+
+  if (shippingMethod !== "recoge" && !address) {
+    return NextResponse.json(
+      { error: "La dirección es obligatoria para envíos." },
+      { status: 400 },
+    );
+  }
 
   // Recalcular precios y totales en el servidor (nunca confiar en datos del cliente).
   const totalQty = items.reduce((n, i) => n + i.qty, 0);
@@ -48,7 +71,9 @@ export async function POST(req: Request) {
     });
   }
 
-  const pricing = computePricing({ subtotal, totalQty, couponCode: coupon });
+  const pricing = computePricing({ subtotal, totalQty, couponCode: coupon, shippingMethod });
+
+  const finalAddress = shippingMethod === "recoge" ? undefined : address;
 
   const order: Order = {
     id: `PNT-${Date.now().toString(36).toUpperCase()}`,
@@ -62,6 +87,8 @@ export async function POST(req: Request) {
     total: pricing.total,
     paymentMethod,
     status: "Pendiente de confirmación",
+    shippingMethod,
+    address: finalAddress,
     createdAt: new Date().toISOString(),
   };
   addOrder(order);

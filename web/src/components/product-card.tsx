@@ -26,9 +26,16 @@ export function ProductCard({ product }: { product: Product }) {
             sizes="(min-width:1024px) 25vw, (min-width:640px) 33vw, 50vw"
             className="object-cover transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-105"
           />
-          <span className="absolute left-3 top-3 rounded-full bg-noir/70 px-3 py-1 text-[10px] font-display tracking-[0.2em] text-accent backdrop-blur">
+          <span
+            className="absolute left-3 top-3 rounded-full bg-noir/70 px-3 py-1 text-[10px] font-display tracking-[0.2em] text-accent backdrop-blur"
+          >
             {product.tag}
           </span>
+          {product.stock <= 0 && (
+            <span className="absolute inset-x-3 bottom-3 rounded-lg bg-noir/80 px-3 py-1.5 text-center text-[11px] font-display tracking-[0.25em] text-cream backdrop-blur">
+              AGOTADO
+            </span>
+          )}
           <button
             onClick={(e) => {
               e.preventDefault();
@@ -61,10 +68,11 @@ export function ProductCard({ product }: { product: Product }) {
       </Link>
       <button
         onClick={quickAdd}
-        className="mt-3 w-full rounded-lg border border-line py-2 font-display text-[11px] tracking-[0.25em] uppercase opacity-0 transition-all duration-300 hover:bg-cream hover:text-noir group-hover:opacity-100"
+        disabled={product.stock <= 0}
+        className="mt-3 w-full rounded-lg border border-line py-2 font-display text-[11px] tracking-[0.25em] uppercase opacity-0 transition-all duration-300 hover:bg-cream hover:text-noir group-hover:opacity-100 disabled:cursor-not-allowed disabled:opacity-40"
         aria-label={`Agregar ${product.name} al carrito`}
       >
-        Agregar rápido
+        {product.stock <= 0 ? "Sin stock" : "Agregar rápido"}
       </button>
     </article>
   );
