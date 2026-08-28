@@ -1,18 +1,17 @@
 # PINTAO — streetwear colombiano
 
-**Una sola tienda**: aplicación Next.js 15 + TypeScript + Tailwind v4 + Framer Motion en [`web/`](web/README.md). Es la app única y definitiva que se desplega en Vercel.
+**Una sola tienda**: aplicación Next.js 15 + TypeScript + Tailwind v4 + Framer Motion **en la raíz del repo**. Es la app única y definitiva que se desplega en Vercel.
 
 ## Producción
 
 - Tienda pública: `https://pintao-store.vercel.app`
-- Hosting y HTTPS: Vercel (configurado con `rootDirectory: web` en `vercel.json`)
+- Hosting y HTTPS: Vercel (la raíz ES la app Next: `vercel.json` con headers de seguridad; sin rewrites legacy)
 - Base de datos real (roadmap): Supabase — migraciones en [`supabase/`](supabase/)
 - La tienda legacy (HTML/JS plano) está archivada en [`legacy/`](legacy/README.md) solo como referencia histórica.
 
 ## Iniciar
 
 ```bash
-cd web
 npm install
 npm run dev
 ```
@@ -47,7 +46,7 @@ El repositorio incluye dos cuentas listas para probar el flujo completo:
 | Administrador | `admin@pintao.local` | `Pintao2026!` | `/admin/login` |
 | Cliente | `cliente@pintao.local` | `Cliente2026!` | `/cuenta` |
 
-- El cliente demo (`Cliente Demo PINTAO`) está sembrado en `web/src/lib/server-store.ts` (store en memoria de desarrollo).
+- El cliente demo (`Cliente Demo PINTAO`) está sembrado en `src/lib/server-store.ts` (store en memoria de desarrollo).
 - El administrador en desarrollo se resuelve desde `ADMIN_EMAIL`/`ADMIN_PASSWORD` (valores por defecto arriba). En producción, la migración `supabase/migrations/202608090001_seed_default_admin.sql` siembra el mismo administrador en `pintao_admin_users` con hash PBKDF2-SHA256 a 210000 iteraciones.
 - **Cámbialas antes de un lanzamiento real** rotando el hash desde un proceso seguro.
 
