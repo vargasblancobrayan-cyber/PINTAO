@@ -37,6 +37,18 @@ export interface OrderItem {
   unitPrice: number;
 }
 
+export interface Address {
+  line1: string;
+  line2?: string;
+  city: string;
+  region: string;
+  postalCode?: string;
+}
+
+export type ShippingMethod = "recoge" | "envio" | "expreso";
+
+export type PaymentMethod = "Transferencia" | "Enlace de pago" | "PSE" | "Contraentrega";
+
 export interface Order {
   id: string;
   customer: { name: string; email: string; phone: string };
@@ -47,8 +59,11 @@ export interface Order {
   couponDiscount: number;
   shipping: number;
   total: number;
-  paymentMethod: string;
+  paymentMethod: PaymentMethod;
   status: string;
+  /** Dirección de destino (aplica cuando shippingMethod es envío. */
+  address?: Address;
+  shippingMethod: ShippingMethod;
   createdAt: string;
 }
 
