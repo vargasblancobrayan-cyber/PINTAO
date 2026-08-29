@@ -1,8 +1,0 @@
-User-Agent: *
-Allow: /
-Disallow: /checkout
-Disallow: /cuenta
-Disallow: /admin
-Disallow: /api
-
-Sitemap: https://pintao-store.vercel.app/sitemap.xml

@@ -1,22 +1,29 @@
 # PINTAO — streetwear colombiano
 
-**Una sola tienda**: aplicación Next.js 15 + TypeScript + Tailwind v4 + Framer Motion **en la raíz del repo**. Es la app única y definitiva que se desplega en Vercel.
+**Una sola tienda**: aplicación Next.js 15 + TypeScript + Tailwind v4 + Framer Motion **en `web/`**. Es la app única y definitiva que se desplegaen Vercel.
 
 ## Producción
 
 - Tienda pública: `https://pintao-store.vercel.app`
-- Hosting y HTTPS: Vercel (la raíz ES la app Next: `vercel.json` con headers de seguridad; sin rewrites legacy)
+- Hosting y HTTPS: Vercel (`vercel.json` con headers de seguridad; sin rewrites legacy)). El Root Directory del proyecto se configura en el dashboard de Vercel (`web/`)).
 - Base de datos real (roadmap): Supabase — migraciones en [`supabase/`](supabase/)
 - La tienda legacy (HTML/JS plano) está archivada en [`legacy/`](legacy/README.md) solo como referencia histórica.
 
 ## Iniciar
 
 ```bash
+cd web
 npm install
 npm run dev
 ```
 
 Abrir `http://127.0.0.1:3000/`.
+
+## Comandos (dentro de `web/`)
+
+- `npm run dev` — desarrollo
+- `npm run build` — build de producción
+- `npm run typecheck` — chequeo de tipos TypeScript
 
 ## Rutas principales (app única)
 

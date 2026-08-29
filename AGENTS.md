@@ -2,13 +2,17 @@
 
 ## Estructura actual
 
-- **Raíz**: sitio legacy estático (HTML/CSS/JS) con `server.js` en Node plano y espejo en Supabase Edge Functions. Se conserva como referencia.
-- **`web/`**: nueva aplicación premium (Next.js 15 + TS strict + Tailwind v4 + Framer Motion). Todo trabajo nuevo debe ir aquí.
+- **`web/`**: aplicación Next.js 15 + TS strict + Tailwind v4 + Framer Motion. **Todo trabajo nuevo debe ir aquí**. Es la app que se desplegaen Vercel (Root Directory del proyecto en el dashboard: `web/`).
+- **`legacy/`**: sitio legacy estático (HTML/CSS/JS) con `server.js` en Node plano y espejo en Supabase Edge Functions.. Solo referencia histórica..
 
 ## Comandos
 
-- Legacy: `npm start` (raíz, `node server.js`) → :4173
-- Nuevo: `cd web && npm run dev|build|typecheck`
+- App nueva: `cd web && npm run dev|build|typecheck`
+- Legacy(referencia): `cd legacy && npm start` → :4173
+
+## Higiene del repo
+
+- **`.next/` y `node_modules/` NO se commitean**: están en `.gitignore`)(raíz)y `web/.gitignore`. Si aparecen rastreados,, `git rm -r --cached .next` y commit sin borrarlos del disco.. Ver commit `65157bb` (añadió `.next` accidentalmente) como antecedente a evitar.
 
 ## Credenciales demo (desarrollo)
 
