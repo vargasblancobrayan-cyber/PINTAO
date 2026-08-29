@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { subscribeNewsletter } from "@/lib/server-store";
+import { subscribeNewsletter } from "@/lib/persistence";
 import { checkRateLimit, clientIp } from "@/lib/rate-limit";
 import { assertSameOrigin } from "@/lib/csrf";
 
@@ -19,6 +19,7 @@ export async function POST(req: Request) {
   const { email } = await req.json();
   const clean = String(email ?? "").toLowerCase().trim();
   if (!/^\S+@\S+\.\S+$/.test(clean)) return NextResponse.json({ error: "Escribe un correo válido" }, { status: 400 });
-  subscribeNewsletter(clean);
+  const result = await subscribeNewsletter(clean);
+  if (!result.ok) return NextResponse.json({ error: result.error ?? "No pudimos registrar el correo." }, { status: 400 });
   return NextResponse.json({ ok: true }, { status: 201 });
 }
