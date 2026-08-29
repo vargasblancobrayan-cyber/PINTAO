@@ -5,7 +5,7 @@
 ## Producción
 
 - Tienda pública: `https://pintao-store.vercel.app`
-- Hosting y HTTPS: Vercel (`vercel.json` con `rootDirectory: web` + headers de seguridad; sin rewrites legacy))
+- Hosting y HTTPS: Vercel (`vercel.json` con headers de seguridad; sin rewrites legacy)). El Root Directory del proyecto se configura en el dashboard de Vercel (`web/`)).
 - Base de datos real (roadmap): Supabase — migraciones en [`supabase/`](supabase/)
 - La tienda legacy (HTML/JS plano) está archivada en [`legacy/`](legacy/README.md) solo como referencia histórica.
 

@@ -2,7 +2,7 @@
 
 ## Estructura actual
 
-- **`web/`**: aplicación Next.js 15 + TS strict + Tailwind v4 + Framer Motion. **Todo trabajo nuevo debe ir aquí**. Es la app que se desplegaen Vercel (`vercel.json` con `rootDirectory: web`)).
+- **`web/`**: aplicación Next.js 15 + TS strict + Tailwind v4 + Framer Motion. **Todo trabajo nuevo debe ir aquí**. Es la app que se desplegaen Vercel (Root Directory del proyecto en el dashboard: `web/`).
 - **`legacy/`**: sitio legacy estático (HTML/CSS/JS) con `server.js` en Node plano y espejo en Supabase Edge Functions.. Solo referencia histórica..
 
 ## Comandos
