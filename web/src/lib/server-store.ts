@@ -73,3 +73,23 @@ export function getQuotes(): Quote[] {
 export function getCustomerOrders(email: string): Order[] {
   return orders.filter((o) => o.customer.email === email).slice().reverse();
 }
+
+/** Busca un pedido por id (memoria). */
+export function findOrderById(id: string): Order | undefined {
+  return orders.find((o) => o.id === id);
+}
+
+/** Actualiza estado de pago de una orden (memoria. */
+export function updateOrderPayment(
+  id: string,
+  paymentStatus: string,
+  wompiTransactionId?: string,
+): Order | null {
+  const order = orders.find((o) => o.id === id);
+  if (!order) return null;
+  if (paymentStatus === "APPROVED") order.status = "Pagado";
+  (order as any).paymentStatus = paymentStatus;
+  if (wompiTransactionId) (order as any).wompiTransactionId = wompiTransactionId;
+  if (paymentStatus === "APPROVED") (order as any).paidAt = new Date().toISOString();
+  return order;
+}

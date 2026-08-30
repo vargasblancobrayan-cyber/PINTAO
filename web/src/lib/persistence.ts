@@ -7,6 +7,8 @@ import {
   getOrders as memGetOrders,
   getQuotes as memGetQuotes,
   getCustomerOrders as memGetCustomerOrders,
+  findOrderById as memFindOrderById,
+  updateOrderPayment as memUpdateOrderPayment,
 } from "./server-store";
 import type { Order, Quote } from "./types";
 
@@ -179,6 +181,50 @@ export async function getQuotes(): Promise<Quote[]> {
     status: row.status,
     createdAt: row.created_at,
   }));
+}
+
+/** Busca un pedido por id (BD con fallback memoria. */
+export async function findOrderById(id: string): Promise<Order | null> {
+  const db = getDb();
+  if (!db) return memFindOrderById(id) ?? null;
+
+  const { data, error } = await db.from("pintao_orders").select("*").eq("id", id).maybeSingle();
+  if (error || !data) return null;
+  return mapRowToOrder(data);
+}
+
+/**
+ * Actualiza el estado de pago de una orden tras el webhook de Wompi.
+ *
+ * - BD: update condicional en pintao_orders (payment_status,, wompi_transaction_id,, paid_at).
+ * - Memoria: muta la orden en server-store..
+ */
+export async function updateOrderPayment(
+  id: string,
+  paymentStatus: string,
+  wompiTransactionId?: string,
+): Promise<Order | null> {
+  const db = getDb();
+  if (!db) return memUpdateOrderPayment(id, paymentStatus, wompiTransactionId);
+
+  const patch: Record<string, unknown> = {
+    payment_status: paymentStatus,
+  };
+  if (wompiTransactionId) patch.wompi_transaction_id = wompiTransactionId;
+  if (paymentStatus === "APPROVED") {
+    patch.paid_at = new Date().toISOString();
+    patch.status = "Pagado";
+  }
+
+  const { data, error } = await db
+    .from("pintao_orders")
+    .update(patch)
+    .eq("id", id)
+    .select("*")
+    .maybeSingle();
+
+  if (error || !data) return null;
+  return mapRowToOrder(data);
 }
 
 /** Recupera un producto con stock actualizado desde la BD. */
