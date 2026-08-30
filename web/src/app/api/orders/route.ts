@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { addOrder, getSession, getCustomerOrders } from "@/lib/server-store";
+import { createOrder, getAllOrders, getOrdersForCustomer } from "@/lib/persistence";
+import { getSession as getDbSession } from "@/lib/auth";
 import type { Order, OrderItem } from "@/lib/types";
 import { orderInputSchema } from "@/lib/validation";
 import { computePricing } from "@/lib/pricing";
@@ -91,15 +92,21 @@ export async function POST(req: Request) {
     address: finalAddress,
     createdAt: new Date().toISOString(),
   };
-  addOrder(order);
+  const result = await createOrder(order);
+  if (!result.ok) {
+    return NextResponse.json({ error: result.error ?? "No pudimos registrar el pedido." }, { status: 400 });
+  }
   return NextResponse.json({ id: order.id, order }, { status: 201 });
 }
 
 /** Para el flujo del checkout y el historial de la cuenta. */
 export async function GET() {
   const cookieStore = await cookies();
-  const user = getSession(cookieStore.get("pintao_session")?.value);
+  const user = await getDbSession(cookieStore.get("pintao_session")?.value);
   if (!user) return NextResponse.json({ error: "Sesión requerida" }, { status: 401 });
-  if (user.role === "admin") return NextResponse.json({ orders: [] });
-  return NextResponse.json({ orders: getCustomerOrders(user.email) });
+  if (user.role === "admin") {
+    const all = await getAllOrders();
+    return NextResponse.json({ orders: all });
+  }
+  return NextResponse.json({ orders: await getOrdersForCustomer(user.email) });
 }

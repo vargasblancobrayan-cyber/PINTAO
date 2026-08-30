@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 import { getActiveProducts } from "@/lib/products";
-import { getOrders } from "@/lib/server-store";
+import { getAllOrders } from "@/lib/persistence";
 
 export const runtime = "nodejs";
 
 export async function GET() {
-  return NextResponse.json({ ok: true, products: getActiveProducts().length, orders: getOrders().length });
+  const orders = await getAllOrders();
+  return NextResponse.json({ ok: true, products: getActiveProducts().length, orders: orders.length });
 }

@@ -10,6 +10,14 @@
 - App nueva: `cd web && npm run dev|build|typecheck`
 - Legacy(referencia): `cd legacy && npm start` → :4173
 
+## Persistencia (Supabase)
+
+- **`src/lib/db.ts`** crea el cliente Supabase si existen `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` (env vars). Sin ellas, todas las rutas caen automáticamente al store en memoria (`src/lib/server-store.ts`) — dev/demo sin setup..
+- **`src/lib/persistence.ts`** es la capa única de datos para rutas API: `createOrder` (inserta + decrementa stock con RPC `decrement_stock` atómico), `createQuote`, `subscribeNewsletter`, `getAllOrders`, `getOrdersForCustomer`, `getQuotes`, `getProductWithLiveStock`.
+- **`src/lib/auth.ts`** maneja sesiones y login: admin validado contra `pintao_admin_users` (PBKDF2-SHA256, 210k iteraciones, igual que la migración seed); sesiones en `pintao_sessions` (token hasheado (SHA-256) . Clientes demo (`cliente@pintao.local`) siguen en memoria..
+- Para aplicar migraciones: `supabase db push` (necesita credenciales locales) o ejecutar los `.sql` de `supabase/migrations/` en el SQL editor del dashboard..
+- En producción, el stock leído desde la BD usa `getProductWithLiveStock` (aún no conectado a las páginas — ver `web/src/lib/persistence.ts`).
+
 ## Higiene del repo
 
 - **`.next/` y `node_modules/` NO se commitean**: están en `.gitignore`)(raíz)y `web/.gitignore`. Si aparecen rastreados,, `git rm -r --cached .next` y commit sin borrarlos del disco.. Ver commit `65157bb` (añadió `.next` accidentalmente) como antecedente a evitar.

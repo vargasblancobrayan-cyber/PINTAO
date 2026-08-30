@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { addQuote } from "@/lib/server-store";
+import { createQuote } from "@/lib/persistence";
 import type { Quote } from "@/lib/types";
 import { checkRateLimit, clientIp } from "@/lib/rate-limit";
 import { assertSameOrigin } from "@/lib/csrf";
@@ -32,6 +32,7 @@ export async function POST(req: Request) {
     status: "Nueva",
     createdAt: new Date().toISOString(),
   };
-  addQuote(quote);
+  const result = await createQuote(quote);
+  if (!result.ok) return NextResponse.json({ error: result.error ?? "No pudimos guardar la cotización." }, { status: 400 });
   return NextResponse.json(quote, { status: 201 });
 }

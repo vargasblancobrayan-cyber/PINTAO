@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createSession, findUserByCredentials } from "@/lib/server-store";
+import { createSession, findUserByCredentials } from "@/lib/auth";
 import { checkRateLimit, clientIp } from "@/lib/rate-limit";
 import { assertSameOrigin } from "@/lib/csrf";
 
@@ -23,10 +23,10 @@ export async function POST(req: Request) {
   const { email, password } = await req.json();
   if (!email || !password) return NextResponse.json({ error: "Correo y contraseña son obligatorios" }, { status: 400 });
 
-  const user = findUserByCredentials(String(email), String(password));
+  const user = await findUserByCredentials(String(email), String(password));
   if (!user) return NextResponse.json({ error: "Credenciales inválidas" }, { status: 401 });
 
-  const token = createSession(user);
+  const token = await createSession(user);
   const res = NextResponse.json({ user });
   res.cookies.set("pintao_session", token, {
     httpOnly: true,

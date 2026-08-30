@@ -1,17 +1,19 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { getSession, getOrders, getQuotes } from "@/lib/server-store";
+import { getSession } from "@/lib/auth";
+import { getAllOrders, getQuotes } from "@/lib/persistence";
 import { getActiveProducts } from "@/lib/products";
 
 export const runtime = "nodejs";
 
 export async function GET() {
   const cookieStore = await cookies();
-  const user = getSession(cookieStore.get("pintao_session")?.value);
+  const user = await getSession(cookieStore.get("pintao_session")?.value);
   if (user?.role !== "admin") return NextResponse.json({ error: "Prohibido" }, { status: 403 });
 
-  const orders = getOrders();
-  const quotes = getQuotes();
+
+  const orders = await getAllOrders();
+  const quotes = await getQuotes();
   const revenue = orders.reduce((sum, o) => sum + (o.total || 0), 0);
 
   return NextResponse.json({
