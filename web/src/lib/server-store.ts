@@ -93,3 +93,10 @@ export function updateOrderPayment(
   if (paymentStatus === "APPROVED") (order as any).paidAt = new Date().toISOString();
   return order;
 }
+/** Actualiza el estado administrativo de una orden (memoria). */
+export function updateOrderStatus(id: string, status: string): Order | null {
+  const order = orders.find((o) => o.id === id);
+  if (!order) return null;
+  order.status = status;
+  return order;
+}

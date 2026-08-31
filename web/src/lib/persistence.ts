@@ -9,6 +9,7 @@ import {
   getCustomerOrders as memGetCustomerOrders,
   findOrderById as memFindOrderById,
   updateOrderPayment as memUpdateOrderPayment,
+  updateOrderStatus as memUpdateOrderStatus,
 } from "./server-store";
 import type { Order, Quote } from "./types";
 
@@ -256,4 +257,20 @@ export async function getProductWithLiveStock(id: number): Promise<(typeof produ
       sku: String(v.sku ?? ""),
     })),
   };
+}
+
+/** Actualiza el estado administrativo de una orden (BD con fallback memoria. */
+export async function updateOrderStatus(id: string, status: string): Promise<Order | null> {
+  const db = getDb();
+  if (!db) return memUpdateOrderStatus(id, status);
+
+  const { data, error } = await db
+    .from("pintao_orders")
+    .update({ status })
+    .eq("id", id)
+    .select("*")
+    .maybeSingle();
+
+  if (error || !data) return null;
+  return mapRowToOrder(data);
 }
