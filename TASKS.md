@@ -17,7 +17,7 @@
 - [x] `loading.tsx` / `error.tsx` de ruta.
 - [x] Panel admin: inventario real (precio, stock, publicar/ocultar, baja).
 - [x] Panel admin: cambio de estado de pedidos reparado (la ruta no entendía el cuerpo que envía la interfaz).
-- [x] Verificación end-to-end reproducible (`web/scripts/e2e-check.js`): 31/31 en verde + comprobaciones de API.
+- [x] Verificación end-to-end reproducible (`web/scripts/e2e-check.js`): 35/35 en verde + comprobaciones de API.
 - [x] Eliminados `*.bak` y los `*.d.ts` que suplantaban los tipos de `next/server`.
 - [x] Documentación actualizada: `AUDIT.md`, `ARCHITECTURE.md`, `SECURITY.md`, `TESTING.md`, `CHANGELOG.md`.
 
