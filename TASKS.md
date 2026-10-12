@@ -25,8 +25,10 @@
 
 - [ ] **Estrategia de render y CSP** (afecta seguridad y rendimiento): hoy se prioriza CSP estricta con render
       dinámico; la alternativa es HTML estático cacheable con `script-src 'unsafe-inline'`. Decisión en `AUDIT.md` §6.1.
-- [ ] **Cuentas de cliente reales**: requiere decidir el almacén de credenciales (Supabase Auth o
-      `pintao_clients.password_hash`). Hoy el login de cliente sólo existe con usuarios demo fuera de producción.
+- [x] **Cuentas de cliente reales**: decidido `pintao_clients.password_hash` (migración
+      `202610120001_clients_credentials.sql`, RLS denegado) y alta en `/acceso` vía `POST /api/auth/register`.
+      Para que funcione en el despliegue hay que cargar `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` en Vercel;
+      sin ellas el alta responde 503. Ver `AUDIT.md` §6.2 (sin verificación de correo ni reset de contraseña).
 - [ ] **Persistencia del catálogo** en `pintao_store` (el panel de inventario escribe en memoria del proceso).
 - [ ] **Descuento de stock al vender**: decidir trigger vs. llamada explícita al RPC `decrement_stock`.
 - [ ] Vitest + Playwright Test (dependencias y CI).

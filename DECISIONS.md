@@ -5,7 +5,8 @@
 - **Persistencia**: Supabase para producción, store en memoria para demo sin credenciales.
 - **Validación**: Zod en `POST /api/orders`; server recomputa totales.
 - **Pago**: Wompi, con webhook y firma `X-Event-Checksum`.
-- **Auth**: Cookie `pintao_session` (HttpOnly), admin en Supabase, cliente en memoria.
+- **Auth**: Cookie `pintao_session` (HttpOnly), admin y cliente en Supabase (`pintao_admin_users` / `pintao_clients`,
+  ambos con PBKDF2); memoria en local sin credenciales.
 - **Render**: Next.js 15,SSG para catálogo; SSR para checkout (esperando session del cliente para no exponer datos en HTML).
 - **Seguridad**: CSP, HSTS, rate limiting, CSRF, `X-Frame-Options: DENY`.
 
@@ -24,6 +25,11 @@
 - **El panel admin edita el mismo catálogo que sirve la tienda** (`lib/admin-products.ts`), no una copia paralela.
 - **Eliminados los `*.d.ts` que redefinían `next/server`**: suplantaban los tipos oficiales y obligaban a evitar
   `NextRequest`/`NextResponse` como valores. Ahora se usan los tipos reales del framework.
+- **Almacén de credenciales de cliente: `pintao_clients.password_hash`** (elegido el 2026-10-12) frente a Supabase
+  Auth. Tabla nueva `202610120001_clients_credentials.sql` con el mismo formato PBKDF2 que `pintao_admin_users`, RLS
+  denegado a `anon`/`authenticated` y alta pública en `POST /api/auth/register`. Se descartó Supabase Auth para no
+  mantener dos sistemas de sesión en el mismo `/acceso`; la contrapartida (sin verificación de correo ni reset de
+  contraseña) queda anotada en `AUDIT.md` §6.2.
 
 ## Conflictos resueltos
 
@@ -36,7 +42,6 @@
 ## Pendientes de decisión
 
 - **Estrategia de render y CSP** (seguridad vs. caché de HTML en el borde): ver `AUDIT.md` §6.1.
-- **Almacén de credenciales de cliente**: Supabase Auth o `pintao_clients.password_hash` (`AUDIT.md` §6.2).
 - **Persistencia del catálogo** editado en el panel admin (`pintao_store`) y **descuento de stock** al vender
   (`decrement_stock` existe en las migraciones pero `createOrder` no lo llama): `AUDIT.md` §6.3 y §6.4.
 - Migración a Next.js 16 para resolver vulnerabilidades de `postcss` (breaking change) y fijar la versión exacta.

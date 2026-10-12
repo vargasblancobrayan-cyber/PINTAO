@@ -39,7 +39,10 @@
 - Panel de filtros en móvil, chips de filtros activos y estado sincronizado con la URL en `/tienda`.
 - Inventario real en la pestaña «PRODUCTOS» del panel admin (precio, stock, publicar/ocultar, baja) contra la API
   existente y sobre el mismo catálogo que sirve la tienda.
-- `web/scripts/e2e-check.js`: verificación end-to-end reproducible (31 comprobaciones).
+- **Cuentas de cliente reales**: tabla `pintao_clients` (migración `202610120001_clients_credentials.sql`, PBKDF2-SHA256
+  a 210 000 iteraciones, RLS denegado a `anon`/`authenticated`), `POST /api/auth/register` y alta en `/acceso` con
+  correo único, contraseña mínima de 8 caracteres, CSRF y 5 altas/minuto por IP.
+- `web/scripts/e2e-check.js`: verificación end-to-end reproducible (35 comprobaciones).
 - `AUDIT.md` con la auditoría completa, evidencias, decisiones pendientes de autorización y limitaciones.
 
 ### Cambiado
@@ -56,7 +59,9 @@
 ### Notas de seguridad
 
 - Las cuentas de demostración sólo se aceptan fuera de producción o con `PINTAO_ALLOW_DEMO_LOGIN=true`;
-  `ADMIN_EMAIL`/`ADMIN_PASSWORD` tienen prioridad.
+  `ADMIN_EMAIL`/`ADMIN_PASSWORD` tienen prioridad. Ese mismo opt-in habilita el alta en memoria fuera de Vercel:
+  en el despliegue real sin claves de Supabase **no se crea ninguna cuenta efímera** (503).
+- El alta de cliente y el login limitan intentos por IP (5/min y 8/min) y sólo aceptan peticiones de origen propio.
 - Sigue pendiente evaluar `npm audit fix --force` (migración a Next 16, *breaking*).
 
 ## [0.1.0] — 2026-08-30 (desarrollo)

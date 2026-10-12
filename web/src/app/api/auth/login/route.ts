@@ -1,6 +1,4 @@
-import { cookies } from "next/headers";
-
-import { SESSION_COOKIE, signIn } from "@/lib/auth";
+import { setSessionCookie, signIn } from "@/lib/auth";
 import { checkRateLimit, clientIp } from "@/lib/rate-limit";
 import { assertSameOrigin } from "@/lib/csrf";
 
@@ -34,14 +32,7 @@ export async function POST(req: Request) {
     return Response.json({ error: result.error ?? "No pudimos iniciar sesión." }, { status: 401 });
   }
 
-  const cookieStore = await cookies();
-  cookieStore.set(SESSION_COOKIE, result.token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    maxAge: 60 * 60 * 24 * 7,
-    path: "/",
-  });
+  await setSessionCookie(result.token);
 
   // `role` es indispensable: el formulario decide el destino del usuario
   // (`/admin` o `/cuenta`) y antes no venía en la respuesta, así que un

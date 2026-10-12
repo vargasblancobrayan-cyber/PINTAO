@@ -58,8 +58,10 @@ El repositorio incluye dos cuentas listas para probar el flujo completo:
 - **Cámbialas antes de un lanzamiento real** rotando el hash desde un proceso seguro.
 - Por seguridad, las cuentas demo **sólo funcionan fuera de producción**. Si pruebas el build de producción en local
   (`npm start`), habilítalas con `PINTAO_ALLOW_DEMO_LOGIN=true`. En un despliegue real define `ADMIN_EMAIL` y
-  `ADMIN_PASSWORD` (tienen prioridad) o usa Supabase. El acceso de **clientes** todavía no tiene almacén de
-  contraseñas: sólo existe con usuarios demo.
+  `ADMIN_PASSWORD` (tienen prioridad) o usa Supabase.
+- **Cuentas de cliente**: cualquiera crea la suya en `/acceso` (enlace «Créala aquí»). La contraseña se guarda con
+  PBKDF2-SHA256 en `pintao_clients` (migración `202610120001_clients_credentials.sql`), así que en el despliegue el
+  alta y el login de cliente exigen `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY`; sin ellas el alta responde 503.
 
 ## Alcance del pago
 

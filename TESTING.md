@@ -4,7 +4,7 @@
 
 - `npm run typecheck` (`tsc --noEmit`): **limpio**.
 - `npm run build`: **exitoso** (Next 15.5.27, sin errores ni avisos de tipos).
-- Verificación funcional end-to-end: **31/31 comprobaciones en verde** sobre el build de producción.
+- Verificación funcional end-to-end: **35/35 comprobaciones en verde** sobre el build de producción.
 - **Todavía no hay suite formal** (Vitest + Playwright Test). Está pendiente de autorización porque añade
   dependencias y scripts de CI (ver `TASKS.md`).
 
@@ -58,9 +58,13 @@ npx playwright-cli run-code --filename=scripts/e2e-check.js
 | 29 | Accesibilidad: contraste AA del texto apagado | PASS (5,33:1) |
 | 30 | Producto inexistente: no queda indexable (`noindex`) | PASS |
 | 31 | Producto inexistente: muestra la página de no encontrado | PASS |
+| 32 | Registro: el alta crea la sesión y abre `/cuenta` | PASS (`e2e-…@pintao.local`) |
+| 33 | Registro: muestra el nombre registrado | PASS |
+| 34 | Registro: un correo duplicado se rechaza (409) | PASS (`ya tiene una cuenta.`) |
+| 35 | Registro: se puede entrar con la cuenta nueva | PASS |
 
-Errores de consola en la ejecución: **1**, y es esperado (el `400` del newsletter con un correo inválido, que es
-justamente lo que prueba la comprobación 23).
+Errores de consola en la ejecución: **2**, y ambos esperados (el `409` del correo duplicado que prueba la
+comprobación 34 y el `400` del newsletter inválido de la comprobación 23).
 
 ### Comprobaciones de API (curl, sesión de administrador)
 
@@ -74,6 +78,12 @@ reescrito:
 | `PATCH /api/admin/orders/:id` **sin sesión** | 403 |
 | `PUT /api/admin/products` **sin sesión** | 403 |
 | `POST` con `Origin` ajeno (CSRF) | 403 |
+| `POST /api/auth/register` (alta válida) | 201 + cookie de sesión y la sesión devuelve el nombre |
+| `POST /api/auth/register` (correo repetido) | 409 `Ese correo ya tiene una cuenta.` |
+| `POST /api/auth/register` (contraseña de 7 caracteres / correo malformado) | 400 con el mensaje del campo |
+| `POST /api/auth/register` con `Origin` ajeno (CSRF) | 403 |
+| `POST /api/auth/register` (6.ª llamada en un minuto) | 429 con `Retry-After: 60` |
+| `POST /api/auth/register` **sin claves de Supabase en producción** | 503, sin cuenta efímera (esperado) |
 
 ### Antes de la intervención
 
@@ -87,8 +97,9 @@ de CSP) y la aplicación no respondía a ningún clic: el botón `CARRITO` no ab
   pagado está revisada en código, pero debe probarse en sandbox.
 - **Persistencia en Supabase** (pedidos, stock atómico, `decrement_stock`, RLS): requiere credenciales. El modo demo
   en memoria sí está verificado. Ojo: `createOrder` **no** descuenta stock todavía (ver `AUDIT.md` §6.4).
-- **Login de administrador contra `pintao_admin_users`** (PBKDF2-SHA256): implementado siguiendo el formato de
-  `202608090001_seed_default_admin.sql`, pero sin ejecutar contra una base de datos real.
+- **Login y alta de cliente contra `pintao_clients`** (PBKDF2-SHA256): implementado siguiendo el formato de
+  `202608090001_seed_default_admin.sql`, pero sin ejecutar contra una base de datos real. Sólo se verificó el modo
+  memoria (alta, sesión, nombre en `/cuenta`, duplicado 409 y nuevo login).
 - **Acciones `cancel`/`restock`** de `/api/admin/orders/[id]`: dependen del RPC `decrement_stock` en Supabase y
   responden 503 en modo demo (ahora con un mensaje explícito). No están expuestas en la interfaz.
 - **Revisión visual humana**: el diseño se validó con métricas del DOM (desbordamiento, contraste, visibilidad de

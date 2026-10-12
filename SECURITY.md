@@ -42,9 +42,12 @@ planteada en `AUDIT.md` §6.1 y **requiere decisión del responsable del product
 - **Cuentas de demostración**: sólo se aceptan cuando `NODE_ENV !== "production"` o con
   `PINTAO_ALLOW_DEMO_LOGIN=true` (pensado para probar el build de producción en local). Nunca deben habilitarse en un
   despliegue real. Si se definen `ADMIN_EMAIL`/`ADMIN_PASSWORD`, tienen prioridad en cualquier entorno.
-- **Los clientes todavía no tienen almacén de contraseñas** (`pintao_clients` guarda nombre, correo y teléfono). Por eso
-  el login de cliente funciona únicamente con usuarios demo y nunca en producción. Habilitarlo exige una decisión de
-  producto (Supabase Auth o `pintao_clients.password_hash`).
+- **Cuentas de cliente**: contraseña en `pintao_clients` con PBKDF2-SHA256 (sal aleatoria, 210 000 iteraciones), en
+  una tabla con RLS denegado a `anon`/`authenticated` y accesible sólo desde el backend con `service_role`. El alta es
+  pública en `/acceso` (`POST /api/auth/register`): mismo origen, 5 altas/minuto por IP, contraseña mínima de 8
+  caracteres y correo único (409 si existe). *Sin verificación de correo ni restablecimiento de contraseña* — es la
+  contrapartida elegida frente a Supabase Auth (`AUDIT.md` §6.2). Sin `SUPABASE_URL` en el despliegue el alta
+  responde 503 y no se crea ninguna cuenta efímera.
 
 ## Pagos
 

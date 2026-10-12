@@ -146,6 +146,57 @@ async (page) => {
   check("cuenta: sesión de cliente activa", account.includes("cliente@pintao.local"));
   check("cuenta: el pedido aparece en el historial", account.includes("PNT-"), account.match(/HISTORIAL DE PEDIDOS[^\n]*/)?.[0] ?? "");
 
+  /* ---------- 5b. Registro de cliente ---------- */
+  const nuevoEmail = `e2e-${Date.now()}@pintao.local`;
+  await page.goto(`${BASE}/acceso`, { waitUntil: "networkidle" });
+  await page.locator("button", { hasText: "Créala aquí" }).click();
+  await wait(400);
+  await page.fill("#name", "Cliente Nuevo E2E");
+  await page.fill("#email", nuevoEmail);
+  await page.fill("#phone", "3009876543");
+  await page.fill("#password", "NuevaClave2026!");
+  await page.locator("button", { hasText: "CREAR CUENTA" }).click();
+  await page.waitForURL("**/cuenta", { timeout: 15000 });
+  await wait(1200);
+  const cuentaNueva = await page.locator("body").innerText();
+  check("registro: el alta crea la sesión y abre /cuenta", cuentaNueva.includes(nuevoEmail), nuevoEmail);
+  // El nombre se pinta con `text-transform: uppercase`, así que `innerText`
+  // devuelve mayúsculas: se compara sin distinguir mayúsculas de minúsculas.
+  check(
+    "registro: muestra el nombre registrado",
+    cuentaNueva.toUpperCase().includes("CLIENTE NUEVO E2E"),
+    cuentaNueva.match(/BIENVENIDO[^\n]*\n?[^\n]*/)?.[0].replace(/\s+/g, " ") ?? "",
+  );
+
+  // Correo duplicado: debe quedarse en /acceso avisando del conflicto.
+  await page.goto(`${BASE}/acceso`, { waitUntil: "networkidle" });
+  await page.locator("button", { hasText: "Créala aquí" }).click();
+  await wait(400);
+  await page.fill("#name", "Otra Persona");
+  await page.fill("#email", nuevoEmail);
+  await page.fill("#password", "OtraClave2026!");
+  await page.locator("button", { hasText: "CREAR CUENTA" }).click();
+  await wait(1000);
+  const dupBody = await page.locator("body").innerText();
+  check(
+    "registro: un correo duplicado se rechaza (409)",
+    page.url().includes("/acceso") && dupBody.includes("ya tiene una cuenta"),
+    dupBody.match(/ya tiene una cuenta[^\n]*/)?.[0] ?? "sin aviso",
+  );
+
+  // Volver a entrar con la cuenta recién creada.
+  await page.locator("button", { hasText: "Inicia sesión" }).click();
+  await wait(300);
+  await page.fill("#email", nuevoEmail);
+  await page.fill("#password", "NuevaClave2026!");
+  await page.locator("button", { hasText: "ENTRAR" }).click();
+  await page.waitForURL("**/cuenta", { timeout: 15000 });
+  await wait(1000);
+  check(
+    "registro: se puede entrar con la cuenta nueva",
+    (await page.locator("body").innerText()).includes(nuevoEmail),
+  );
+
   /* ---------- 6. Panel admin ---------- */
   await page.goto(`${BASE}/admin/login`, { waitUntil: "networkidle" });
   await page.fill("#email", "admin@pintao.local");

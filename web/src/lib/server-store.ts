@@ -48,6 +48,32 @@ export function findUserByCredentials(email: string, password: string): User | n
   return u ? { id: u.id, name: u.name, email: u.email, role: u.role } : null;
 }
 
+/**
+ * Alta de cliente en el store en memoria (modo demo, sólo fuera de producción).
+ * Devuelve `null` si el correo ya está registrado.
+ */
+export function registerDemoCustomer({
+  name,
+  email,
+  password,
+}: {
+  name: string;
+  email: string;
+  password: string;
+}): User | null {
+  const clean = email.toLowerCase().trim();
+  if (DEMO_USERS.some((x) => x.email === clean)) return null;
+  const user: User & { password: string } = {
+    id: `u-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`,
+    name,
+    email: clean,
+    password,
+    role: "customer",
+  };
+  DEMO_USERS.push(user);
+  return { id: user.id, name: user.name, email: user.email, role: user.role };
+}
+
 export function addOrder(order: Order) {
   orders.push(order);
   return order;

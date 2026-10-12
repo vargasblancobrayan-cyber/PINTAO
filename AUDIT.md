@@ -92,9 +92,15 @@ interfaz. Todas las comprobaciones se repitieron después del arreglo: ver `TEST
    *Alternativa si prefieres rendimiento de CDN:* volver a estático y usar `script-src 'self' 'unsafe-inline'`
    (el riesgo práctico es bajo: la app no renderiza HTML de usuario y el único `dangerouslySetInnerHTML` es el
    JSON-LD con datos del catálogo propio). **Decide tú**: seguridad estricta (actual) o caché de HTML.
-2. **Cuentas de cliente reales.** No existe almacén de contraseñas de cliente (`pintao_clients` guarda nombre,
-   correo y teléfono). Hoy el login de cliente sólo funciona con usuarios demo y **nunca en producción**.
-   Habilitarlo requiere elegir entre Supabase Auth o `pintao_clients.password_hash` (decisión de producto/seguridad).
+2. **Cuentas de cliente reales — decidido y aplicado.** Se eligió el almacén propio
+   `pintao_clients.password_hash` (migración `202610120001_clients_credentials.sql`: RLS habilitado y denegado a
+   `anon`/`authenticated`, sólo `service_role`) frente a Supabase Auth, para conservar un único modelo de sesión
+   (`pintao_sessions` ya soporta `role='customer'`) y el historial vinculado por `customer.email`. El alta es pública
+   en `/acceso` (`POST /api/auth/register`, mismo origen + 5 altas/min por IP + PBKDF2-SHA256 a 210 000 iteraciones)
+   y reutiliza el verificador ya auditado para `pintao_admin_users`.
+   *Contrapartida asumida:* no hay verificación de correo ni restablecimiento de contraseña. Si más adelante hacen
+   falta, ese es el momento de migrar los clientes a Supabase Auth. **Pendiente de tu acción:** cargar las claves de
+   Supabase en Vercel; sin ellas el alta responde 503 y el login de cliente sigue sin funcionar en el despliegue.
 3. **Persistencia del catálogo.** Las ediciones del panel de inventario viven en memoria del proceso (se pierden al
    reiniciar). La fuente definitiva es la tabla `pintao_store`; hace falta decidir si el catálogo se sirve desde
    Supabase o si se escribe en la tabla con un RPC.

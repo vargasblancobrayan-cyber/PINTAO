@@ -43,6 +43,7 @@ web/
 │   ├── orders/[id]/         # GET detail (auth)
 │   ├── auth/session         # GET current user
 │   ├── auth/login           # POST login
+│   ├── auth/register        # POST sign-up (customers)
 │   ├── health               # GET health
 │   ├── newsletter           # POST subscribe
 │   └── payments/wompi/      # POST create / webhook
@@ -54,8 +55,11 @@ web/
 
 1. **Client** → fetch `/api/orders` (with session cookie) → **API route** → **persistence layer** → **DB or memory store**.
 2. **Pricing**: `checkout-form.tsx` computes a local preview; `POST /api/orders` recalculates server-side from `products.ts + computePricing` and only trusts it after zod validation.
-3. **Payment**: `POST /api/payments/wompi/create` returns a payment link. The server marks the order as `APPROVED` and updates status. Wompi webhook closes the loop.
-4. **Auth**: session stored as an `HttpOnly` cookie `pintao_session`. Admin validated against `pintao_admin_users`; customers validated against the memory demo users.
+3. **Payment**: `POST /api/payments/wompi/create` returns a payment link and leaves the order as `PENDING`; only the
+   Wompi webhook, after verifying `X-Event-Checksum`, can move it to `APPROVED`.
+4. **Auth**: session stored as an `HttpOnly` cookie `pintao_session`. Admin validated against `pintao_admin_users`;
+   customers against `pintao_clients` (same PBKDF2 format), falling back to the in-memory demo users without
+   Supabase.
 
 ## Persistence decisions
 
@@ -88,13 +92,17 @@ response, and skips static assets/images (`_next/static`, `_next/image`, `icon.s
 - Cookie `pintao_session` holds a random 32-byte hex token; `pintao_sessions` stores `token_hash = sha256(token)`
   with `expires_at` (sliding renewal).
 - Admin passwords: PBKDF2-SHA256 (hex salt, 210 000 iterations), constant-time comparison.
+- Customer passwords: same format in `pintao_clients` (migration `202610120001_clients_credentials.sql`, RLS denied
+  to `anon`/`authenticated`). Sign-up is public at `POST /api/auth/register` (same-origin, 5/min per IP, unique e-mail
+  → 409, minimum 8 characters) and issues the session cookie right away. Without Supabase in production it responds
+  503 instead of creating an ephemeral in-memory account.
 - Without Supabase credentials the module falls back to the in-memory users in `lib/server-store.ts`
   (development only; gated behind `PINTAO_ALLOW_DEMO_LOGIN` when `NODE_ENV=production`).
 
 ## Security
 
 - CSP with a per-request nonce (`src/middleware.ts`); `script-src 'self' 'nonce-…' 'strict-dynamic'`.
-- Rate limiting: per-IP, in-memory, configured per endpoint (including login).
+- Rate limiting: per-IP, in-memory, configured per endpoint (login 8/min, sign-up 5/min).
 - CSRF: `assertSameOrigin` on write endpoints.
 - Input validation: Zod on `POST /api/orders`; server recomputes totals.
 - Security headers: HSTS, X-Frame-Options, nosniff, Permissions-Policy, Referrer-Policy.

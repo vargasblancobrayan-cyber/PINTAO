@@ -14,6 +14,7 @@ export default function AccesoPage() {
       <AuthForm
         title="Entrar."
         hint="Demo: cliente@pintao.local / Cliente2026! · admin@pintao.local / Pintao2026!"
+        allowRegister
       />
       <Link href="/admin/login" className="mt-8 text-xs text-mute underline">
         Acceso administrativo dedicado →
