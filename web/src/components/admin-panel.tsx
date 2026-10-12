@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { formatCOP } from "@/lib/format";
 import type { Order, Quote } from "@/lib/types";
+import { AdminProductsTable } from "./admin-products-table";
 
 interface Stats {
   products: number;
@@ -13,7 +14,7 @@ interface Stats {
   revenue: number;
 }
 
-const ORDER_STATUSES = ["Pendiente de confirmación", "Pagado", "Enviado", "Completado", "Cancelado"];
+const ORDER_STATUSES = ["Pendiente de confirmación", "Pagado", "Enviado", "Completado", "Cancelado"] as const;
 
 type View = "resumen" | "pedidos" | "productos" | "cotizaciones";
 
@@ -57,11 +58,11 @@ function OrderDetail({ order }: { order: Order }) {
         <p className="eyebrow mb-1">RESUMEN</p>
         <div className="space-y-1 text-xs">
           <p className="flex justify-between gap-4"><span className="text-sand">Subtotal</span><span>{formatCOP(order.subtotal)}</span></p>
-          {order.volumeDiscount > 0 && (
-            <p className="flex justify-between gap-4"><span className="text-sand">Descuento volumen</span><span className="text-accent">-{formatCOP(order.volumeDiscount)}</span></p>
+          {order.volume_discount > 0 && (
+            <p className="flex justify-between gap-4"><span className="text-sand">Descuento volumen</span><span className="text-accent">-{formatCOP(order.volume_discount)}</span></p>
           )}
           {order.coupon && (
-            <p className="flex justify-between gap-4"><span className="text-sand">Cupón {order.coupon}</span><span className="text-accent">-{formatCOP(order.couponDiscount)}</span></p>
+            <p className="flex justify-between gap-4"><span className="text-sand">Cupón {order.coupon}</span><span className="text-accent">-{formatCOP(order.coupon_discount)}</span></p>
           )}
           <p className="flex justify-between gap-4"><span className="text-sand">Envío</span><span>{order.shipping ? formatCOP(order.shipping) : "Gratis"}</span></p>
         </div>
@@ -176,7 +177,6 @@ export function AdminPanel() {
     }
     return [...map.values()].sort((a, b) => b.total - a.total);
   }, [stats]);
-
 
   const pendingCount = stats?.orders.filter((o) => o.status === "Pendiente de confirmación").length ?? 0;
 
@@ -316,17 +316,7 @@ export function AdminPanel() {
         </section>
       )}
 
-      {view === "productos" && (
-        <section>
-          <h2 className="eyebrow mb-4">PRODUCTOS ({stats.products})</h2>
-          <p className="mb-6 text-sm text-sand">
-            Inventario total: {stats.stock.toLocaleString("es-CO")} unidades. La gestión fina de catálogo (precios, tallas, galería) se hace en código en `web/src/lib/products.ts`.
-          </p>
-          <div className="card-surface p-6 text-sm text-sand">
-            El catálogo actual es estático por diseño (roadmap: edición desde Supabase). Los pedidos descuentan stock atómicamente vía `decrement_stock`.
-          </div>
-        </section>
-      )}
+      {view === "productos" && <AdminProductsTable />}
 
       {view === "cotizaciones" && (
         <section>

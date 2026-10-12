@@ -9,6 +9,21 @@ import { CartDrawer } from "@/components/cart-drawer";
 const archivo = Archivo({ subsets: ["latin"], variable: "--font-archivo", weight: ["400", "500", "600", "700", "800", "900"] });
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
+/*
+ * Render dinámico en todo el árbol.
+ *
+ * La CSP con `nonce` (ver `src/middleware.ts`) sólo protege HTML generado por
+ * petición: una página pre-renderizada se sirve con scripts inline sin nonce y el
+ * navegador los bloquea (página visible pero sin hidratación). Next.js lo
+ * documenta así: usar nonce implica render dinámico.
+ *
+ * El coste es asumible: el catálogo es local y las páginas ya se renderizan en
+ * el servidor con datos en memoria. Si en el futuro se prioriza cachear HTML en
+ * el borde, hay que cambiar la CSP a hashes o permitir `'unsafe-inline'` en
+ * scripts (ver SECURITY.md, «CSP y render»).
+ */
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   metadataBase: new URL("https://pintao-store.vercel.app"),
   title: {
@@ -39,7 +54,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <Providers>
           <SiteHeader />
-          <main className="min-h-[70vh]">{children}</main>
+          <main id="contenido" className="min-h-[70vh]">
+            {children}
+          </main>
           <CartDrawer />
           <SiteFooter />
         </Providers>

@@ -2,17 +2,20 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import type { Product } from "@/lib/types";
 import { formatCOP, unitPriceWithDiscount } from "@/lib/format";
 import { useCart, useFavorites } from "./providers";
 
 export function ProductDetail({ product }: { product: Product }) {
   const gallery = product.gallery.length ? product.gallery : [product.img];
+  const reduce = useReducedMotion();
   const [activeImg, setActiveImg] = useState(0);
   const [size, setSize] = useState(product.sizes[Math.floor(product.sizes.length / 2)]);
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
+  const addTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { add } = useCart();
   const fav = useFavorites();
 
@@ -21,16 +24,35 @@ export function ProductDetail({ product }: { product: Product }) {
     [product, size],
   );
 
+  const available = variant?.stock ?? product.stock;
   const unit = unitPriceWithDiscount(product.price, qty);
-  const outOfStock = (variant?.stock ?? product.stock) === 0;
+  const outOfStock = available === 0;
+
+  useEffect(
+    () => () => {
+      if (addTimer.current) clearTimeout(addTimer.current);
+    },
+    [],
+  );
+
+  // Al cambiar de talla, la cantidad se ajusta al stock disponible.
+  useEffect(() => {
+    setQty((q) => Math.max(1, Math.min(q, Math.max(1, available))));
+  }, [available]);
 
   const handleAdd = () => {
     add(product.id, size, qty);
     setAdded(true);
-    setTimeout(() => setAdded(false), 1600);
+    if (addTimer.current) clearTimeout(addTimer.current);
+    addTimer.current = setTimeout(() => setAdded(false), 1600);
   };
 
-  const buyNow = () => add(product.id, size, qty);
+  /**
+   * "Comprar ahora" navega al checkout, así que el carrito no debe abrirse
+   * encima (`openDrawer: false`): antes el drawer quedaba abierto tapando el
+   * checkout recién cargado.
+   */
+  const buyNow = () => add(product.id, size, qty, { openDrawer: false });
 
   return (
     <div className="grid gap-10 lg:grid-cols-[1.15fr_1fr]">
@@ -54,14 +76,26 @@ export function ProductDetail({ product }: { product: Product }) {
           ))}
         </div>
         <div className="relative aspect-[4/5] overflow-hidden rounded-3xl bg-coal">
-          <Image
-            key={activeImg}
-            src={gallery[activeImg]}
-            alt={product.name}
-            fill
-            priority
-            className="object-cover"
-          />
+          {/* Fundido entre imágenes en lugar de un salto seco. */}
+          <AnimatePresence initial={false} mode="popLayout">
+            <motion.div
+              key={activeImg}
+              initial={reduce ? false : { opacity: 0, scale: 1.02 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={reduce ? undefined : { opacity: 0 }}
+              transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+              className="absolute inset-0"
+            >
+              <Image
+                src={gallery[activeImg]}
+                alt={product.name}
+                fill
+                priority
+                sizes="(min-width:1024px) 55vw, 100vw"
+                className="object-cover"
+              />
+            </motion.div>
+          </AnimatePresence>
           <span className="absolute left-4 top-4 rounded-full bg-noir/70 px-4 py-1.5 text-xs font-display tracking-[0.2em] text-accent backdrop-blur">
             {product.tag}
           </span>
@@ -112,7 +146,7 @@ export function ProductDetail({ product }: { product: Product }) {
           <p className="mt-3 text-xs text-sand" aria-live="polite">
             {outOfStock
               ? "Talla agotada — prueba otra talla"
-              : `${variant?.stock ?? 0} disponibles en talla ${size}`}
+              : `${available} disponibles en talla ${size}`}
           </p>
         </div>
 
@@ -120,9 +154,25 @@ export function ProductDetail({ product }: { product: Product }) {
         <div className="mt-8 space-y-3">
           <div className="flex flex-wrap items-center gap-4">
             <div className="flex items-center rounded-lg border border-line">
-              <button onClick={() => setQty(Math.max(1, qty - 1))} className="px-4 py-2.5 hover:text-accent" aria-label="Reducir cantidad">−</button>
-              <span className="min-w-10 text-center font-medium" aria-live="polite">{qty}</span>
-              <button onClick={() => setQty(qty + 1)} className="px-4 py-2.5 hover:text-accent" aria-label="Aumentar cantidad">+</button>
+              <button
+                onClick={() => setQty(Math.max(1, qty - 1))}
+                className="px-4 py-2.5 transition-colors hover:text-accent disabled:opacity-40"
+                aria-label="Reducir cantidad"
+                disabled={qty <= 1}
+              >
+                −
+              </button>
+              <span className="min-w-10 text-center font-medium" aria-live="polite">
+                {qty}
+              </span>
+              <button
+                onClick={() => setQty(Math.min(available || 1, qty + 1))}
+                className="px-4 py-2.5 transition-colors hover:text-accent disabled:opacity-40"
+                aria-label="Aumentar cantidad"
+                disabled={outOfStock || qty >= available}
+              >
+                +
+              </button>
             </div>
             <div className="flex items-center gap-2">
               <button onClick={() => fav.toggle(product.id)} aria-label="Favorito"

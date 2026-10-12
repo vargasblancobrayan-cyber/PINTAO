@@ -56,7 +56,20 @@ El repositorio incluye dos cuentas listas para probar el flujo completo:
 - El cliente demo (`Cliente Demo PINTAO`) está sembrado en `src/lib/server-store.ts` (store en memoria de desarrollo).
 - El administrador en desarrollo se resuelve desde `ADMIN_EMAIL`/`ADMIN_PASSWORD` (valores por defecto arriba). En producción, la migración `supabase/migrations/202608090001_seed_default_admin.sql` siembra el mismo administrador en `pintao_admin_users` con hash PBKDF2-SHA256 a 210000 iteraciones.
 - **Cámbialas antes de un lanzamiento real** rotando el hash desde un proceso seguro.
+- Por seguridad, las cuentas demo **sólo funcionan fuera de producción**. Si pruebas el build de producción en local
+  (`npm start`), habilítalas con `PINTAO_ALLOW_DEMO_LOGIN=true`. En un despliegue real define `ADMIN_EMAIL` y
+  `ADMIN_PASSWORD` (tienen prioridad) o usa Supabase. El acceso de **clientes** todavía no tiene almacén de
+  contraseñas: sólo existe con usuarios demo.
 
 ## Alcance del pago
 
-El checkout registra solicitudes pendientes de confirmación. No simula un cobro. Para cobrar en producción se debe integrar una pasarela y validar sus notificaciones en el servidor.
+El checkout registra la solicitud del pedido en estado «Pendiente de confirmación». Si el comprador elige «Enlace de
+pago» o «PSE», la app pide a Wompi un enlace de pago real (`POST /api/payments/wompi/create`) y lo muestra en la
+confirmación. **Sólo el webhook firmado de Wompi puede marcar un pedido como pagado**; crear la transacción no lo
+hace. Sin `WOMPI_PUBLIC_KEY`/`WOMPI_INTEGRITY_SECRET` el endpoint responde 503 y el checkout avisa al comprador.
+
+## Estado del proyecto
+
+- Auditoría de esta iteración, con evidencias y decisiones pendientes de autorización: [`AUDIT.md`](AUDIT.md).
+- Informe de pruebas y cómo reproducirlas: [`TESTING.md`](TESTING.md).
+

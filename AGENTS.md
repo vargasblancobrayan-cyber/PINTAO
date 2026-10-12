@@ -14,7 +14,8 @@
 
 - **`src/lib/db.ts`** crea el cliente Supabase si existen `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` (env vars). Sin ellas, todas las rutas caen automáticamente al store en memoria (`src/lib/server-store.ts`) — dev/demo sin setup..
 - **`src/lib/persistence.ts`** es la capa única de datos para rutas API: `createOrder` (inserta + decrementa stock con RPC `decrement_stock` atómico), `createQuote`, `subscribeNewsletter`, `getAllOrders`, `getOrdersForCustomer`, `getQuotes`, `getProductWithLiveStock`.
-- **`src/lib/auth.ts`** maneja sesiones y login: admin validado contra `pintao_admin_users` (PBKDF2-SHA256, 210k iteraciones, igual que la migración seed); sesiones en `pintao_sessions` (token hasheado (SHA-256) . Clientes demo (`cliente@pintao.local`) siguen en memoria..
+- **`src/lib/auth.ts`** maneja sesiones y login: admin validado contra `pintao_admin_users` (PBKDF2-SHA256, 210k iteraciones, igual que la migración seed); sesiones en `pintao_sessions` con **`token_hash` = SHA-256 del token** (la cookie guarda el token en claro, la tabla sólo su hash) y `expires_at` con renovación deslizante. Sin Supabase usa los usuarios de `server-store.ts`; las cuentas demo sólo valen fuera de producción o con `PINTAO_ALLOW_DEMO_LOGIN=true`.
+- **CSP**: vive en `src/middleware.ts` con **nonce por petición** (`script-src 'self' 'nonce-…' 'strict-dynamic'`). Esto obliga a render dinámico (`export const dynamic = "force-dynamic"` en `app/layout.tsx`): el nonce no existe en HTML pre-renderizado y las páginas estáticas quedaban sin hidratar. No mover la CSP de vuelta a `next.config.ts` sin leer `AUDIT.md` §6.1.
 - Para aplicar migraciones: `supabase db push` (necesita credenciales locales) o ejecutar los `.sql` de `supabase/migrations/` en el SQL editor del dashboard..
 - En producción, el stock leído desde la BD usa `getProductWithLiveStock` (aún no conectado a las páginas — ver `web/src/lib/persistence.ts`).
 
@@ -30,9 +31,9 @@
 ## Observaciones clave
 
 - Tailwind v4: `@apply` no puede referenciar clases custom definidas en el mismo archivo (usar selectores combinados).
-- El store en memoria (`web/src/lib/server-store.ts`) es la capa única para rutas API; el reemplazo por Supabase está documentado en `web/README.md`.
+- El store en memoria (`web/src/lib/server-store.ts`) es la capa de desarrollo: **guarda de verdad** pedidos y cotizaciones (antes los descartaba y el historial salía vacío). El reemplazo por Supabase está documentado en `web/README.md` y `ARCHITECTURE.md`.
 - Carrito (`web/src/components/cart-drawer.tsx`): los `color` de producto son nombres en español (no hex); usa `COLOR_SWATCH` para los chips de color. Microinteracciones Framer Motion respetan `prefers-reduced-motion`.
-- La tienda DESPLEGADA en Vercel es la **legacy** (raíz: `index.html` + `shop.js` + `shop.css` + `premium.css`), no `web/`. Mejoras visibles del carrito van en el inject de `shop.js` (markup `cart-drawer`) + estilos aditivos en `premium.css` (tokens `--p-*`). Expuesto en `window.Punto` (`Punto.add`, `Punto.money`, etc.) y el `cart` se lee de `localStorage['pintao-cart']`.
+- **La tienda desplegada es `web/`** (Next.js). El Root Directory del proyecto en Vercel es `web/`. `legacy/` está archivada y **no** debe recibir mejoras: si algo hay que cambiar en la tienda, se cambia en `web/`. (Este párrafo decía lo contrario y contradecía al README; ver `AUDIT.md`.)
 
 ### Pricing unificado (web/)
 - `web/src/lib/pricing.ts` es la ÚNICA fuente de verdad para precios: `computePricing()` calcula descuento por volumen + cupón + envío. Devuelve `{ subtotal, volumeDiscount, afterVolume, coupon, couponDiscount, afterCoupon, shipping, freeShipping, total }`.

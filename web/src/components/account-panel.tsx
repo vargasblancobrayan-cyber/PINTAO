@@ -1,10 +1,12 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import type { Order, Product } from "@/lib/types";
 import { formatCOP } from "@/lib/format";
 import { products } from "@/lib/products";
+import { useFavorites } from "./providers";
 
 function StatusBadge({ status }: { status: string }) {
   const tone =
@@ -39,11 +41,11 @@ function OrderDetail({ order }: { order: Order }) {
         <p className="eyebrow mb-1">RESUMEN</p>
         <div className="space-y-1 text-xs">
           <p className="flex justify-between gap-4"><span className="text-sand">Subtotal</span><span>{formatCOP(order.subtotal)}</span></p>
-          {order.volumeDiscount > 0 && (
-            <p className="flex justify-between gap-4"><span className="text-sand">Descuento volumen</span><span className="text-accent">-{formatCOP(order.volumeDiscount)}</span></p>
+          {order.volume_discount > 0 && (
+            <p className="flex justify-between gap-4"><span className="text-sand">Descuento volumen</span><span className="text-accent">-{formatCOP(order.volume_discount)}</span></p>
           )}
           {order.coupon && (
-            <p className="flex justify-between gap-4"><span className="text-sand">Cupón {order.coupon}</span><span className="text-accent">-{formatCOP(order.couponDiscount)}</span></p>
+            <p className="flex justify-between gap-4"><span className="text-sand">Cupón {order.coupon}</span><span className="text-accent">-{formatCOP(order.coupon_discount)}</span></p>
           )}
           <p className="flex justify-between gap-4"><span className="text-sand">Envío</span><span>{order.shipping ? formatCOP(order.shipping) : "Gratis"}</span></p>
         </div>
@@ -65,8 +67,10 @@ function FavoriteProduct({ product }: { product: Product }) {
       href={`/producto/${product.id}`}
       className="card-surface group flex items-center gap-4 p-4 transition-colors hover:border-accent/40"
     >
-      {/* eslint-disable-next-line @next/next/no-img-element */ }
-      <img src={product.img} alt={product.name} className="h-16 w-16 shrink-0 rounded-lg object-cover" loading="lazy" />
+      {/* <Image> en lugar de <img>: entrega AVIF/WebP y tamaños responsivos. */}
+      <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-ash">
+        <Image src={product.img} alt={product.name} fill sizes="64px" className="object-cover" />
+      </div>
       <div className="min-w-0 flex-1">
         <p className="truncate font-display text-sm">{product.name}</p>
         <p className="text-xs text-sand">{product.category} · {formatCOP(product.price)}</p>
@@ -81,9 +85,11 @@ export function AccountPanel() {
 
 
   const [orders, setOrders] = useState<Order[]>([]);
-   const [loading, setLoading] = useState(true);
-  const [favoriteIds, setFavoriteIds] = useState<number[]>([]);
-   const [expanded, setExpanded] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [expanded, setExpanded] = useState<string | null>(null);
+  // Favoritos desde el contexto compartido: se actualizan en vivo, sin releer
+  // `localStorage` (que quedaba desincronizado al marcar un favorito).
+  const { favorites: favoriteIds } = useFavorites();
 
   useEffect(() => {
     let active = true;
@@ -93,30 +99,34 @@ export function AccountPanel() {
         if (!active) return;
         setData(d.user);
         if (d.user) {
-          fetch("/api/orders")
+          return fetch("/api/orders")
             .then((r) => (r.ok ? r.json() : { orders: [] }))
-            .then((o) => { if (active) setOrders(o.orders ?? []); });
+            .then((o) => {
+              if (active) setOrders(o.orders ?? []);
+            });
         }
       })
-      .finally(() => { if (active) setLoading(false); });
-    return () => { active = false; };
+      .catch(() => {
+        if (active) setData(null);
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
   }, []);
-
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem("pintao-favs");
-      if (raw) setFavoriteIds(JSON.parse(raw));
-    } catch { /* noop */ }
-  }, []);
-
-
 
   const favoriteProducts = products.filter((p) => favoriteIds.includes(p.id));
 
-
-
   if (loading) {
-    return <div className="card-surface p-8 text-center text-sand">Cargando tu cuenta…</div>;
+    return (
+      <div className="space-y-3" aria-busy="true">
+        <div className="skeleton h-28 w-full rounded-2xl" />
+        <div className="skeleton h-20 w-full rounded-2xl" />
+        <div className="skeleton h-20 w-full rounded-2xl" />
+      </div>
+    );
   }
 
 

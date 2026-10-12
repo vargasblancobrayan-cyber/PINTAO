@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useCart } from "./providers";
 import { products } from "@/lib/products";
@@ -101,18 +101,30 @@ function DiscountProgress({ count }: { count: number }) {
         })}
       </div>
       <p className="mt-2 text-[10px] tracking-[0.18em] text-mute">
-        D<span className="text-accent">+/</span> unidades mejoran el precio automáticamente
+        <span className="text-accent">12+</span> unidades mejoran el precio automáticamente
       </p>
     </div>
   );
 }
 
 export function CartDrawer() {
-  const { items, open, setOpen, setQty, remove } = useCart();
+  // El cupón vive en el contexto del carrito para que el checkout reciba el
+  // mismo código que se aplicó aquí (antes cada pantalla tenía el suyo y se
+  // perdía al pasar al checkout).
+  const { items, open, setOpen, setQty, remove, coupon: appliedCoupon, setCoupon } = useCart();
   const reduce = useReducedMotion();
   const [couponCode, setCouponCode] = useState("");
   const [couponMsg, setCouponMsg] = useState<{ ok: boolean; text: string } | null>(null);
-  const [appliedCoupon, setAppliedCoupon] = useState<string | undefined>(undefined);
+
+  // Cerrar con Escape: comportamiento esperado de un diálogo.
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [open, setOpen]);
 
   const count = items.reduce((n, i) => n + i.qty, 0);
   const lines = items
@@ -142,10 +154,10 @@ export function CartDrawer() {
   const applyCoupon = () => {
     const code = couponCode.trim().toUpperCase();
     if (COUPONS[code]) {
-      setAppliedCoupon(code);
+      setCoupon(code);
       setCouponMsg({ ok: true, text: `✓ Cupón ${code} aplicado (-${COUPONS[code] * 100}%)` });
     } else {
-      setAppliedCoupon(undefined);
+      setCoupon(undefined);
       setCouponMsg({ ok: false, text: "Código no válido. Prueba PINTAO10 o DROP01." });
     }
   };
@@ -169,6 +181,7 @@ export function CartDrawer() {
             exit={{ x: "100%" }}
             transition={{ type: "spring", damping: 30, stiffness: 300 }}
             role="dialog"
+            aria-modal="true"
             aria-label="Carrito de compras"
           >
             <div className="relative flex items-center justify-between gap-4 border-b border-accent/30 bg-accent/[0.06] px-7 py-6">

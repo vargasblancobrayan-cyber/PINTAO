@@ -1,6 +1,6 @@
-const SUPABASE_URL = Deno.env.get('SUPABASE_URL') ?? '';
-const SECRET_KEYS = JSON.parse(Deno.env.get('SUPABASE_SECRET_KEYS') ?? '{}');
-const API_KEY = SECRET_KEYS.default || Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
+const SUPABASE_URL = process.env.SUPABASE_URL ?? '';
+const SECRET_KEYS = JSON.parse(process.env.SUPABASE_SECRET_KEYS ?? '{}');
+const API_KEY = SECRET_KEYS.default || process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 const SESSION_SECONDS = 60 * 60 * 10;
 const PBKDF2_ITERATIONS = 210_000;
 

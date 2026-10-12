@@ -10,10 +10,14 @@ interface CartCtx {
   count: number;
   open: boolean;
   setOpen: (v: boolean) => void;
-  add: (productId: number, size: string, qty?: number) => void;
+  /** `openDrawer: false` para añadir sin abrir el carrito (p. ej. "comprar ahora"). */
+  add: (productId: number, size: string, qty?: number, opts?: { openDrawer?: boolean }) => void;
   remove: (productId: number, size: string) => void;
   setQty: (productId: number, size: string, qty: number) => void;
   clear: () => void;
+  /** Cupón validado y compartido entre el carrito y el checkout. */
+  coupon: string | undefined;
+  setCoupon: (code: string | undefined) => void;
 }
 
 const CartContext = createContext<CartCtx | null>(null);
@@ -51,20 +55,29 @@ function usePersistentState<T>(key: string, initial: T): [T, (v: T | ((prev: T) 
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = usePersistentState<CartItem[]>("pintao-cart", []);
+  const [coupon, setCouponState] = usePersistentState<string | undefined>("pintao-coupon", undefined);
   const [open, setOpen] = useState(false);
 
-  const add = useCallback((productId: number, size: string, qty = 1) => {
-    setItems((prev) => {
-      const idx = prev.findIndex((i) => i.productId === productId && i.size === size);
-      if (idx >= 0) {
-        const next = [...prev];
-        next[idx] = { ...next[idx], qty: next[idx].qty + qty };
-        return next;
-      }
-      return [...prev, { productId, size, qty }];
-    });
-    setOpen(true);
-  }, [setItems]);
+  const add = useCallback(
+    (productId: number, size: string, qty = 1, opts?: { openDrawer?: boolean }) => {
+      setItems((prev) => {
+        const idx = prev.findIndex((i) => i.productId === productId && i.size === size);
+        if (idx >= 0) {
+          const next = [...prev];
+          next[idx] = { ...next[idx], qty: next[idx].qty + qty };
+          return next;
+        }
+        return [...prev, { productId, size, qty }];
+      });
+      if (opts?.openDrawer !== false) setOpen(true);
+    },
+    [setItems],
+  );
+
+  const setCoupon = useCallback(
+    (code: string | undefined) => setCouponState(code ? code.trim().toUpperCase() : undefined),
+    [setCouponState],
+  );
 
   const remove = useCallback((productId: number, size: string) => {
     setItems((prev) => prev.filter((i) => !(i.productId === productId && i.size === size)));
@@ -86,8 +99,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const count = useMemo(() => items.reduce((n, i) => n + i.qty, 0), [items]);
 
   const value = useMemo(
-    () => ({ items, count, open, setOpen, add, remove, setQty, clear }),
-    [items, count, open, add, remove, setQty, clear],
+    () => ({ items, count, open, setOpen, add, remove, setQty, clear, coupon, setCoupon }),
+    [items, count, open, add, remove, setQty, clear, coupon, setCoupon],
   );
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

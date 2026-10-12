@@ -8,7 +8,11 @@ import { Reveal } from "@/components/motion";
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const product = getProduct(Number(id));
-  if (!product) return { title: "Producto no encontrado" };
+  if (!product) {
+    // La ruta responde 200 (el HTML ya empezó a transmitirse con el layout), así
+    // que se marca `noindex` para que un "soft 404" no acabe en Google.
+    return { title: "Producto no encontrado", robots: { index: false, follow: true } };
+  }
   const description = `${product.name} · ${product.category} ${product.color}. ${product.description} Envíos a toda Colombia y descuentos por volumen desde 12 unidades.`;
   return {
     title: product.name,
@@ -24,10 +28,12 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   };
 }
 
-export function generateStaticParams() {
-  return getActiveProducts().map((p) => ({ id: String(p.id) }));
-}
-
+/*
+ * Sin `generateStaticParams`: la ficha se renderiza por petición junto con el
+ * resto del árbol (ver el comentario de `dynamic` en `app/layout.tsx`). La CSP
+ * con nonce exige HTML generado por petición para poder ejecutar los scripts
+ * inline de Next; con pre-render estático la página se ve pero no hidrata.
+ */
 export default async function ProductPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const product = getProduct(Number(id));

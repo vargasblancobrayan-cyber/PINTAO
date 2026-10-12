@@ -58,8 +58,9 @@ export function addQuote(quote: Quote) {
   return quote;
 }
 
-export function subscribeNewsletter(email: string) {
+export function subscribeNewsletter(email: string): boolean {
   newsletter.add(email.toLowerCase().trim());
+  return true;
 }
 
 export function getOrders(): Order[] {

@@ -17,7 +17,7 @@ const raw: RawProduct[] = [
   [1, "Polo Azul Nocturno", 56900, "Camisetas", "Azul", ["S", "M", "L", "XL"], 32, "https://images.unsplash.com/photo-1618517351616-38fb9c5210c6?auto=format&fit=crop&w=900&q=85", "Esencial de cuello polo con estructura limpia y tacto suave."],
   [2, "Camiseta Premium Carbón", 54900, "Básicas", "Negro", ["S", "M", "L", "XL", "XXL"], 28, "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=900&q=85", "Camiseta versátil de corte regular para una rotación comercial constante."],
   [3, "Oversize Arena", 49900, "Oversize", "Crema", ["S", "M", "L", "XL"], 19, "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?auto=format&fit=crop&w=900&q=85", "Silueta amplia, hombro caído y presencia urbana."],
-  [4, "Polo Essential Blanco", 57900, "Camisetas", "Blanco", ["S", "M", "L", "XL"], 36, "https://images.unsplash.com/photo-1625910513413-5fc45e7b3086?auto=format&fit=crop&w=900&q=85", "Polo luminoso para vitrinas de básicos premium."],
+  [4, "Polo Essential Blanco", 57900, "Camisetas", "Blanco", ["S", "M", "L", "XL"], 36, "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?auto=format&fit=crop&w=900&q=85", "Polo luminoso para vitrinas de básicos premium."],
   [5, "Chaqueta Urban Negra", 98900, "Chaquetas", "Negro", ["S", "M", "L", "XL"], 13, "https://images.unsplash.com/photo-1551028719-00167b16eac5?auto=format&fit=crop&w=900&q=85", "Chaqueta ligera con estética nocturna y acabado resistente."],
   [6, "Buzo Active Arena", 74900, "Deportiva", "Crema", ["S", "M", "L", "XL"], 21, "https://images.unsplash.com/photo-1578681994506-b8f463449011?auto=format&fit=crop&w=900&q=85", "Capa cómoda para movimiento diario y looks deportivos."],
   [7, "Jean Slim Índigo", 89900, "Jeans", "Azul", ["30", "32", "34", "36", "38"], 24, "https://images.unsplash.com/photo-1542272604-787c3835535d?auto=format&fit=crop&w=900&q=85", "Denim índigo de silueta slim y construcción comercial."],
@@ -145,4 +145,7 @@ export function getProduct(id: number): Product | undefined {
 
 export function getActiveProducts(): Product[] {
   return products.filter((p) => p.active);
+}
+export function getProductById(id: number): Product | undefined {
+  return products.find((p) => p.id === id);
 }

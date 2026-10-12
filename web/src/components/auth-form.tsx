@@ -15,17 +15,32 @@ export function AuthForm({ title, hint }: { title: string; hint?: string }) {
     e.preventDefault();
     setLoading(true);
     setError(null);
-    const res = await fetch("/api/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
+    let res: Response;
+    try {
+      res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+    } catch {
+      setLoading(false);
+      setError("No pudimos conectar con el servidor. Intenta de nuevo.");
+      return;
+    }
     setLoading(false);
     if (!res.ok) {
-      setError((await res.json()).error ?? "No pudimos iniciar sesión");
+      const data = await res.json().catch(() => ({}));
+      setError(data.error ?? "No pudimos iniciar sesión");
       return;
     }
     const { user } = await res.json();
+    /*
+     * La sesión la fija el servidor con una cookie `HttpOnly` (`pintao_session`)
+     * desde `/api/auth/login`. Aquí había un intento de escribir a mano una
+     * cookie `pintao_refresh` con la bandera `HttpOnly`: el navegador **ignora**
+     * `HttpOnly` en `document.cookie`, así que el código no protegía nada (y la
+     * API nunca devolvía `refreshToken`, por lo que ni siquiera se ejecutaba).
+     */
     router.push(user.role === "admin" ? "/admin" : "/cuenta");
   }
 

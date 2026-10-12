@@ -3,7 +3,7 @@
 /*
   PINTAO Noir — Design System
   Escala oscura editorial: negro carbón, crema hueso, ámbar de acento.
-  Dark-first, móvil primero, tipografía display condensada.
+  Dark-first, móvil primero, tipografía display Archivo.
 */
 @theme {
   --color-noir: #0a0a0a;
@@ -11,7 +11,10 @@
   --color-ash: #1c1c19;
   --color-cream: #f5f1ea;
   --color-sand: #a49c8b;
-  --color-mute: #6f6a5f;
+  /* `mute` se usa en textos de 10-12 px: el tono anterior (#6f6a5f) daba
+     ~3,7:1 sobre el negro y no llegaba al mínimo AA (4,5:1). #8a8478 sube a
+     ~5,3:1 manteniendo el aire apagado de la paleta. */
+  --color-mute: #8a8478;
   --color-accent: #c9a227;
   --color-accent-soft: #dfc268;
   --color-danger: #e05c4d;
@@ -22,6 +25,8 @@
 
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --animate-fade-up: fade-up 0.7s var(--ease-out-expo) both;
+  --animate-ticker: ticker 34s linear infinite;
+  --animate-shimmer: shimmer 1.6s ease-in-out infinite;
 
   @keyframes fade-up {
     from {
@@ -33,19 +38,53 @@
       transform: translateY(0);
     }
   }
+
+  /* Cinta de la barra superior: el contenido se duplica y se desplaza -50%. */
+  @keyframes ticker {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  @keyframes shimmer {
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
+  }
 }
 
 html {
   scroll-behavior: smooth;
+  /* Evita el salto de layout cuando aparece/desaparece la barra de scroll. */
+  scrollbar-gutter: stable;
 }
 
 body {
   @apply bg-noir text-cream font-body antialiased;
+  /* Los degradados de la identidad necesitan un fondo base sólido. */
+  background-color: var(--color-noir);
 }
 
 ::selection {
   background: var(--color-accent);
   color: var(--color-noir);
+}
+
+/*
+  Foco visible consistente en todo el producto.
+  Antes los controles dependían del anillo por defecto del navegador y los
+  campos usaban `outline-none`, así que navegar con teclado era casi invisible.
+*/
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 
 /* ---------- Utilidades del sistema ---------- */
@@ -64,12 +103,14 @@ body {
 .btn-dark {
   @apply inline-flex items-center justify-center gap-2 font-display uppercase tracking-[0.2em]
     text-xs px-6 py-3.5 border transition-all duration-300 cursor-pointer select-none;
+  /* Feedback inmediato al pulsar: el botón "cede" 1px. */
+  @apply active:translate-y-px active:scale-[0.99];
 }
 .btn-solid {
   @apply bg-cream text-noir border-cream hover:bg-accent hover:border-accent hover:text-noir;
 }
 .btn-ghost {
-  @apply bg-transparent text-cream border-line hover:border-cream;
+  @apply bg-transparent text-cream border-line hover:border-cream hover:bg-cream/5;
 }
 .btn-dark {
   @apply bg-noir text-cream border-noir hover:bg-ash;
@@ -88,9 +129,12 @@ body {
     placeholder:text-mute outline-none transition-colors duration-200
     focus:border-accent/60 focus:bg-ash;
 }
+.field[aria-invalid="true"] {
+  @apply border-danger/70 bg-danger/5;
+}
 
 .glass {
-  background: rgba(10, 10, 10, 0.55);
+  background: rgba(10, 10, 10, 0.72);
   backdrop-filter: blur(18px) saturate(140%);
   -webkit-backdrop-filter: blur(18px) saturate(140%);
   border-bottom: 1px solid var(--color-line);
@@ -100,10 +144,75 @@ body {
   text-wrap: balance;
 }
 
+/* Cinta infinita de la barra superior. */
+.ticker-track {
+  @apply flex w-max animate-ticker;
+}
+.ticker-track:hover {
+  animation-play-state: paused;
+}
+
+/* Skeleton con brillo en movimiento (más legible que un pulso plano). */
+.skeleton {
+  background: linear-gradient(90deg, var(--color-ash) 25%, #2a2a25 37%, var(--color-ash) 63%);
+  background-size: 200% 100%;
+  animation: var(--animate-shimmer);
+}
+
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+/* Barras de scroll acordes a la identidad oscura (solo escritorio). */
+@media (pointer: fine) {
+  * {
+    scrollbar-color: var(--color-ash) transparent;
+    scrollbar-width: thin;
+  }
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #2c2c27;
+    border: 2px solid var(--color-noir);
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-mute);
+  }
+}
+
+/*
+  Red de seguridad de movimiento reducido.
+  Los componentes usan `useReducedMotion` de Framer Motion, pero este bloque
+  cubre también animaciones CSS puras (cinta, shimmer, hover) y el scroll suave.
+*/
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@media print {
+  header,
+  footer,
+  aside {
+    display: none !important;
+  }
 }
