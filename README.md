@@ -24,6 +24,7 @@ Abrir `http://127.0.0.1:3000/`.
 - `npm run dev` — desarrollo
 - `npm run build` — build de producción
 - `npm run typecheck` — chequeo de tipos TypeScript
+- `node scripts/api-check.mjs` — verificación de API (stock, idempotencia, cancelación) contra un servidor levantado
 
 ## Rutas principales (app única)
 
@@ -62,6 +63,16 @@ El repositorio incluye dos cuentas listas para probar el flujo completo:
 - **Cuentas de cliente**: cualquiera crea la suya en `/acceso` (enlace «Créala aquí»). La contraseña se guarda con
   PBKDF2-SHA256 en `pintao_clients` (migración `202610120001_clients_credentials.sql`), así que en el despliegue el
   alta y el login de cliente exigen `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY`; sin ellas el alta responde 503.
+
+## Inventario e idempotencia
+
+- **El stock se descuenta al vender** y se repone al cancelar (`lib/stock.ts` → `decrement_stock` / `increment_stock`).
+  Si el inventario no alcanza, el pedido responde 409 y no se crea. Requiere la migración
+  `202610130001_idempotencia_stock_webhooks.sql`; sin Supabase el inventario vive en memoria del proceso (dev/demo).
+- **Los pedidos y pagos son idempotentes**: el checkout envía `Idempotency-Key` y un reintento del navegador devuelve
+  el mismo pedido (y el mismo enlace de pago) en lugar de duplicarlo.
+- El **webhook de Wompi se deduplica** por `<transacción>:<estado>`: un reintento del proveedor no vuelve a aprobar
+  el cobro.
 
 ## Alcance del pago
 

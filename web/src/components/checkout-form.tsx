@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useCart } from "./providers";
 import { products } from "@/lib/products";
@@ -119,6 +119,26 @@ export function CheckoutForm() {
   const [shippingMethod, setShippingMethod] = useState<ShippingMethod>("envio");
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("Transferencia");
 
+  /*
+   * Clave de idempotencia del intento de compra.
+   *
+   * Se genera una vez y se reutiliza mientras el mismo intento siga en curso: si
+   * el navegador reintenta el POST (red inestable, F5, doble clic), el servidor
+   * devuelve **el mismo pedido** en lugar de crear otro. Se descarta al completar
+   * la compra para que el siguiente pedido use una clave nueva.
+   */
+  const idempotencyKey = useRef<string | null>(null);
+
+  function currentIdempotencyKey(): string {
+    if (!idempotencyKey.current) {
+      idempotencyKey.current =
+        typeof crypto !== "undefined" && "randomUUID" in crypto
+          ? crypto.randomUUID()
+          : `pintao-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+    }
+    return idempotencyKey.current;
+  }
+
   const totalQty = items.reduce((n, i) => n + i.qty, 0);
   const summary = useMemo(
     () =>
@@ -186,10 +206,11 @@ export function CheckoutForm() {
     setLoading(true);
     setError(null);
     setPaymentNote(null);
+    const key = currentIdempotencyKey();
     try {
       const res = await fetch("/api/orders", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "Idempotency-Key": key },
         body: JSON.stringify({
           customer: { name: form.name, email: form.email, phone: form.phone },
           paymentMethod,
@@ -215,6 +236,8 @@ export function CheckoutForm() {
       }
 
       const orderId: string = data.id;
+      // El intento terminó: el siguiente pedido llevará su propia clave.
+      idempotencyKey.current = null;
       clear();
       setDone(orderId);
 
@@ -223,7 +246,7 @@ export function CheckoutForm() {
       if (ONLINE_METHODS.includes(paymentMethod)) {
         const payRes = await fetch("/api/payments/wompi/create", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json", "Idempotency-Key": key },
           body: JSON.stringify({ orderId }),
         });
         const pay = await payRes.json().catch(() => ({}));

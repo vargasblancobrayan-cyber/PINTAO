@@ -35,8 +35,11 @@ Añadir una funcionalidad solo si resuelve un problema real del cliente (comprad
       variables, que hoy no coinciden entre documentación y código.
 - [ ] Asegurar que las respuestas de Wompi abran el pago conforme.
 - [ ] Definir la estrategia de stock: tabla `pintao_store` ya existe para productos; se reemplaza `pintao_store` por view / RPC.
-- [ ] **Descontar stock al crear el pedido**: las migraciones definen el RPC `decrement_stock` pero `createOrder` no lo
-      llama, así que hoy el stock no baja al vender (decisión: trigger o llamada explícita).
+- [x] **Descontar stock al crear el pedido** (2026-10-13): `createOrder` llama al RPC atómico `decrement_stock` vía
+      `lib/stock.ts` (llamada explícita, no trigger) y cancela reponiendo con `increment_stock`. Verificado en modo
+      memoria con `scripts/api-check.mjs` (15/15).
+- [ ] **Stock visible al cliente en modo Supabase**: conectar `getProductWithLiveStock` a la tienda y a la ficha para
+      no mostrar unidades ya vendidas.
 - [ ] Persistir en `pintao_store` las ediciones del panel de inventario (hoy viven en memoria del proceso).
 
 ### Fase 4: Soporte operativo

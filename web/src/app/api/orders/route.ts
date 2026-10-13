@@ -10,6 +10,7 @@ import { unitPriceWithDiscount } from "@/lib/format";
 import { products } from "@/lib/products";
 import { checkRateLimit, clientIp } from "@/lib/rate-limit";
 import { assertSameOrigin } from "@/lib/csrf";
+import { beginIdempotent } from "@/lib/idempotency";
 
 export const runtime = "nodejs";
 
@@ -120,11 +121,39 @@ shippingMethod,
 address: finalAddress,
 createdAt: new Date().toISOString(),
 };
+
+/*
+ * Idempotencia: el checkout envía un `Idempotency-Key` por intento. Si el
+ * navegador reintenta la petición (F5, red inestable, doble clic), se devuelve el
+ * mismo pedido en lugar de crear otro. Sin clave, el comportamiento es el de
+ * siempre (la idempotencia es opcional).
+ */
+const decision = await beginIdempotent(req, "orders:create");
+if (decision.state === "replay") {
+return Response.json(decision.body, { status: decision.status });
+}
+if (decision.state === "in_flight") {
+return Response.json(
+{ error: "Ya estamos registrando este pedido. Espera un momento." },
+{ status: 409 },
+);
+}
+
 const result = await createOrder(order);
 if (!result.ok) {
-return Response.json({ error: result.error ?? "No pudimos registrar el pedido." }, { status: 400 });
+const error = result.error ?? "No pudimos registrar el pedido.";
+// 409: el inventario cambió mientras el cliente completaba el checkout.
+// 400/422: el pedido no es registrable y el cliente puede corregirlo.
+const status = result.code === "insufficient_stock" || result.code === "unavailable" ? 409 : 500;
+// Un fallo no se guarda como respuesta idempotente: el mismo intento puede
+// repetirse con la misma clave sin quedarse pegado al error.
+await decision.complete(422, { error });
+return Response.json({ error }, { status });
 }
-return Response.json({ id: order.id, order }, { status: 201 });
+
+const created = { id: order.id, order };
+await decision.complete(201, created);
+return Response.json(created, { status: 201 });
 }
 
 /** Para el flujo del checkout y el historial de la cuenta (admin o cliente). */

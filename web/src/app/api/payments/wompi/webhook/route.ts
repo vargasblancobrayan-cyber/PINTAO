@@ -1,6 +1,7 @@
 
 import { getWompiConfig, verifyWebhookSignature } from "@/lib/wompi";
 import { findOrderById, updateOrderPayment, createPaymentAttempt } from "@/lib/persistence";
+import { markWebhookEvent } from "@/lib/idempotency";
 
 export const runtime = "nodejs";
 
@@ -12,7 +13,10 @@ export const runtime = "nodejs";
 * + timestamp + integrity secret). Si el resultado es APPROVED, marca el
 * pedido como Pagado.
 *
-* Wompi reintenta enviar el evento hasta 3 veces si no respondemos 200.
+* Wompi reintenta enviar el evento hasta 3 veces si no respondemos 200. Por eso
+* cada evento se registra en `pintao_webhook_events` (`<transacción>:<estado>`) y
+* un reintento responde 200 `{ duplicate: true }` sin volver a aplicar el cobro:
+* antes, el mismo `transaction.updated` se procesaba todas las veces.
 */
 export async function POST(req: Request) {
 const config = getWompiConfig();
@@ -75,10 +79,27 @@ const amountOk = Number(transaction.amount_in_cents ?? transaction.amountInCents
 if (!amountOk) {
 return Response.json({ error: "monto no coincide" }, { status: 409 });
 }
+// Dedupe antes de aplicar: sólo el primer evento de este resultado cobra efecto.
+const { first } = await markWebhookEvent(`${String(transaction.id)}:${status}`, {
+  source: "wompi",
+  orderId: order.id,
+  transactionId: String(transaction.id),
+  status,
+});
+if (!first) return Response.json({ ok: true, duplicate: true });
+
 // Registrar intento APPROVED en la tabla de intentos
 await createPaymentAttempt(order.id, "APPROVED");
 await updateOrderPayment(order.id, "APPROVED", String(transaction.id));
 } else if (["DECLINED", "VOIDED", "ERROR"].includes(status)) {
+const { first } = await markWebhookEvent(`${String(transaction.id)}:${status}`, {
+  source: "wompi",
+  orderId: order.id,
+  transactionId: String(transaction.id),
+  status,
+});
+if (!first) return Response.json({ ok: true, duplicate: true });
+
 await updateOrderPayment(order.id, status, String(transaction.id));
 }
 

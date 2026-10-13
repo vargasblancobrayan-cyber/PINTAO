@@ -11,6 +11,7 @@ import {
   updateOrderPayment as updateMemoryOrderPayment,
   updateOrderStatus as updateMemoryOrderStatus,
 } from "./server-store";
+import { commitStock, recordStockMovements, releaseStock } from "./stock";
 import type { Order, Quote, Product } from "./types";
 
 /**
@@ -29,11 +30,42 @@ export interface CreateOrderResult {
   order: Order;
   ok: boolean;
   error?: string;
+  /** Motivo tipado para que la ruta responda el código HTTP correcto. */
+  code?: "insufficient_stock" | "unavailable" | "error";
 }
 
+/** Líneas de inventario de un pedido (producto + talla + cantidad). */
+function stockItemsOf(order: Order) {
+  return order.items.map((i) => ({ productId: i.productId, size: i.size, qty: i.qty }));
+}
+
+/**
+ * Guarda el pedido **y descuenta inventario**.
+ *
+ * Hasta ahora el stock sólo se validaba contra el catálogo en memoria y nunca se
+ * descontaba (`AUDIT.md` §6.4): se podía vender la misma unidad muchas veces.
+ *
+ * Orden de operaciones: se inserta el pedido y después se descuenta el stock con
+ * el RPC atómico. Si el descuento falla, se borra el pedido insertado
+ * (compensación) para no dejar una venta registrada sin inventario reservado. La
+ * alternativa —descontar primero— perdería stock si fallara el insert.
+ */
 export async function createOrder(order: Order): Promise<CreateOrderResult> {
+  const items = stockItemsOf(order);
   const db = getDb();
+
   if (!db) {
+    // Sin base de datos el stock vive en memoria: se valida/descuenta antes de
+    // registrar el pedido, así no hace falta compensar nada.
+    const stock = await commitStock(items);
+    if (!stock.ok) {
+      return {
+        order,
+        ok: false,
+        error: stock.detail,
+        code: stock.reason === "insufficient" ? "insufficient_stock" : stock.reason === "unavailable" ? "unavailable" : "error",
+      };
+    }
     addOrderToMemory(order);
     return { order, ok: true };
   }
@@ -55,7 +87,43 @@ export async function createOrder(order: Order): Promise<CreateOrderResult> {
     created_at: order.createdAt,
   });
 
-  if (error) return { order, ok: false, error: "No pudimos guardar el pedido" };
+  if (error) return { order, ok: false, error: "No pudimos guardar el pedido", code: "error" };
+
+  const stock = await commitStock(items);
+  if (!stock.ok) {
+    // Compensación: el pedido no debe existir si no hay stock reservado.
+    await db.from("pintao_orders").delete().eq("id", order.id);
+    return {
+      order,
+      ok: false,
+      error: stock.detail,
+      code: stock.reason === "insufficient" ? "insufficient_stock" : stock.reason === "unavailable" ? "unavailable" : "error",
+    };
+  }
+
+  await recordStockMovements(order.id, items, "DECREMENT", "venta");
+  return { order, ok: true };
+}
+
+/**
+ * Repone el inventario de un pedido (cancelación o devolución).
+ *
+ * Antes, `/api/admin/orders/[id]` con `action: "cancel"` llamaba a
+ * `decrement_stock`: **volvía a descontar** en lugar de reponer, así que cancelar
+ * un pedido empeoraba el inventario en vez de devolverlo.
+ */
+export async function restoreOrderStock(order: Order, reason: string): Promise<CreateOrderResult> {
+  const items = stockItemsOf(order);
+  const stock = await releaseStock(items);
+  if (!stock.ok) {
+    return {
+      order,
+      ok: false,
+      error: stock.detail,
+      code: stock.reason === "unavailable" ? "unavailable" : "error",
+    };
+  }
+  await recordStockMovements(order.id, items, "INCREMENT", reason);
   return { order, ok: true };
 }
 
@@ -160,7 +228,7 @@ export async function updateOrderPayment(
 
 export async function createPaymentAttempt(
   orderId: string,
-  result: "PENDING" | "APPROVED" | "DECLINED" | "VOIDED" | "ERROR"
+  result: "PENDING" | "APPROVED" | "DECLINED" | "VOIDED" | "ERROR",
 ): Promise<boolean> {
   const db = getDb();
   if (!db) return true; // modo demo: no se auditan intentos

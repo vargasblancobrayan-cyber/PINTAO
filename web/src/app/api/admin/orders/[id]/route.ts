@@ -2,8 +2,10 @@ import { cookies } from "next/headers";
 
 import { SESSION_COOKIE, getSession } from "@/lib/auth";
 import { getDb } from "@/lib/db";
-import { findOrderById, updateOrderStatus } from "@/lib/persistence";
+import { findOrderById, restoreOrderStock, updateOrderStatus } from "@/lib/persistence";
+import { commitStock } from "@/lib/stock";
 import { assertSameOrigin } from "@/lib/csrf";
+import type { Order } from "@/lib/types";
 
 export const runtime = "nodejs";
 
@@ -54,9 +56,15 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id?: st
 /**
  * PATCH /api/admin/orders/[id]
  *
- * - `{ status }`                   → cambia el estado (es lo que envía el panel).
- * - `{ action: "cancel" }`         → cancela y refunde stock (requiere Supabase).
- * - `{ action: "restock", qty }`   → refunde unidades del pedido (requiere Supabase).
+ * - `{ status }`            → cambia el estado (es lo que envía el panel).
+ * - `{ action: "cancel" }`  → cancela el pedido y **devuelve** su stock.
+ * - `{ action: "restock" }` → deshace una cancelación (vuelve a descontar stock).
+ *
+ * Ambas acciones de stock son idempotentes: cancelar dos veces no repone inventario
+ * dos veces y sólo un pedido cancelado puede reponerse. Hasta ahora, «cancelar»
+ * llamaba a `decrement_stock`, es decir **volvía a descontar** en lugar de reponer,
+ * y sólo funcionaba con Supabase (503 en modo demo). Ahora usa `lib/stock.ts`, que
+ * sirve en los dos modos.
  *
  * El panel enviaba `{ status }` pero esta ruta sólo entendía `{ action }`, así que
  * **todos los botones de cambio de estado devolvían 400 "action desconocido"**.
@@ -96,44 +104,45 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id?: s
   const action = body?.action;
 
   /* ---------- Acciones administrativas que tocan stock ---------- */
-  if (action === "cancel" || action === "restock") {
-    const db = getDb();
-    if (!db) {
+  const items = (order.items ?? []).map((i: { productId: number; size: string; qty: number }) => ({
+    productId: i.productId,
+    size: i.size,
+    qty: i.qty,
+  }));
+
+  if (action === "cancel") {
+    if (order.status === "Cancelado") {
+      return Response.json({ ok: true, action: "cancel", unchanged: true });
+    }
+
+    const restored = await restoreOrderStock(order as Order, "cancelación");
+    if (!restored.ok) {
+      return Response.json({ error: restored.error ?? "No pudimos reponer el stock." }, { status: 500 });
+    }
+
+    const ok = await updateOrderStatus(id, "Cancelado");
+    if (!ok) return Response.json({ error: "No pudimos cancelar el pedido." }, { status: 500 });
+
+    return Response.json({ ok: true, action: "cancel" });
+  }
+
+  if (action === "restock") {
+    if (order.status !== "Cancelado") {
       return Response.json(
-        {
-          error:
-            "Esta acción necesita Supabase: sin base de datos no hay movimientos de stock que registrar.",
-        },
-        { status: 503 },
+        { error: "Sólo se puede reponer el stock de un pedido cancelado." },
+        { status: 400 },
       );
     }
 
-    const qty = action === "restock" ? Number(body?.qty) : undefined;
-    if (action === "restock" && (!qty || qty < 0)) {
-      return Response.json({ error: "qty (número >= 0) es obligatorio" }, { status: 400 });
-    }
-
-    const items = (order.items ?? []).map((i: { productId: number; size: string; qty: number }) => ({
-      productId: i.productId,
-      size: i.size,
-      qty: i.qty,
-    }));
-    const { error: rpcError } = await db.rpc("decrement_stock", { p_items: items });
-    if (rpcError) return Response.json({ error: "No pudimos refundir el stock." }, { status: 500 });
-
-    if (action === "cancel") {
-      const { error: statusError } = await db
-        .from("pintao_orders")
-        .update({ status: "Cancelado" })
-        .eq("id", id);
-      if (statusError) return Response.json({ error: "No pudimos cancelar el pedido." }, { status: 500 });
-
-      return Response.json({ ok: true, action: "cancel" });
+    const committed = await commitStock(items);
+    if (!committed.ok) {
+      return Response.json({ error: committed.detail }, { status: 409 });
     }
 
     const ok = await updateOrderStatus(id, "Pendiente de confirmación");
-    if (!ok) return Response.json({ error: "No pudimos refundir el stock." }, { status: 500 });
-    return Response.json({ ok: true, action: "restock", qty });
+    if (!ok) return Response.json({ error: "No pudimos actualizar el pedido." }, { status: 500 });
+
+    return Response.json({ ok: true, action: "restock" });
   }
 
   return Response.json(

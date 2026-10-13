@@ -5,6 +5,8 @@
 - `npm run typecheck` (`tsc --noEmit`): **limpio**.
 - `npm run build`: **exitoso** (Next 15.5.27, sin errores ni avisos de tipos).
 - Verificación funcional end-to-end: **35/35 comprobaciones en verde** sobre el build de producción.
+- Verificación de API sin navegador (`scripts/api-check.mjs`): **15/15 en verde** (stock, idempotencia,
+  cancelación, CSRF). Ver más abajo.
 - **Todavía no hay suite formal** (Vitest + Playwright Test). Está pendiente de autorización porque añade
   dependencias y scripts de CI (ver `TASKS.md`).
 
@@ -23,7 +25,39 @@ npx playwright-cli open                     # abre la sesión de navegador
 npx playwright-cli run-code --filename=scripts/e2e-check.js
 ```
 
-## Resultado de la última ejecución (2026-10-12, build de producción)
+## Comprobación de API sin navegador (`scripts/api-check.mjs`)
+
+Cubre lo que el recorrido en navegador no puede observar: el descuento real de inventario, la idempotencia de los
+endpoints de escritura y la cancelación administrativa.
+
+```bash
+cd web
+npm run build
+PINTAO_ALLOW_DEMO_LOGIN=true npm start          # o: npm run dev
+node scripts/api-check.mjs                      # PINTAO_BASE para apuntar a otro host
+```
+
+### Resultado de la última ejecución (2026-10-13, build de producción)
+
+| # | Comprobación | Resultado |
+|---|---|---|
+| 1 | El catálogo responde y reporta inventario | PASS (`40 unidades`) |
+| 2 | El pedido se registra (201) | PASS (`PNT-…`) |
+| 3 | Vender descuenta inventario | PASS (`40 → 37`) |
+| 4 | Repetir la `Idempotency-Key` devuelve el MISMO pedido | PASS (`PNT-MV78C7UC` = `PNT-MV78C7UC`) |
+| 5 | La repetición no descuenta stock otra vez | PASS (`37 → 37`) |
+| 6 | Sin `Idempotency-Key` el pedido se registra como siempre | PASS (id distinto) |
+| 7 | Se puede comprar todo el inventario disponible | PASS |
+| 8 | Comprar sin inventario se rechaza | PASS (`400` «Stock insuficiente. Solo 0 unidades…») |
+| 9 | El rechazo no descuenta nada | PASS (`0 unidades`) |
+| 10 | Login de administrador | PASS (`200`, rol `admin`) |
+| 11 | Cancelar repone el stock (no lo descuenta) | PASS (`200 → 2 unidades`) |
+| 12 | Cancelar dos veces no repone inventario dos veces | PASS (`unchanged: true`) |
+| 13 | Reponer una cancelación vuelve a descontar el stock | PASS (`200 → 0 unidades`) |
+| 14 | No se puede reponer un pedido no cancelado | PASS (`400`) |
+| 15 | CSRF: un origen ajeno se rechaza | PASS (`403`) |
+
+## Resultado de la última ejecución del recorrido en navegador (2026-10-12, build de producción)
 
 | # | Comprobación | Resultado |
 |---|---|---|
@@ -95,13 +129,20 @@ de CSP) y la aplicación no respondía a ningún clic: el botón `CARRITO` no ab
 - **Flujo de pago real con Wompi**: sin `WOMPI_PUBLIC_KEY` y `WOMPI_INTEGRITY_SECRET` el endpoint responde 503 y el
   checkout lo informa correctamente. La corrección de que una transacción recién creada **no** marque el pedido como
   pagado está revisada en código, pero debe probarse en sandbox.
-- **Persistencia en Supabase** (pedidos, stock atómico, `decrement_stock`, RLS): requiere credenciales. El modo demo
-  en memoria sí está verificado. Ojo: `createOrder` **no** descuenta stock todavía (ver `AUDIT.md` §6.4).
+- **Persistencia en Supabase** (pedidos, stock atómico, `decrement_stock`, `increment_stock`, RLS): requiere
+  credenciales. El modo demo en memoria sí está verificado, incluido el descuento y la reposición de stock.
+- **Migración `202610130001_idempotencia_stock_webhooks.sql`**: escrita y revisada, **sin aplicar** (no hay Supabase
+  en el entorno). El camino SQL (RPC atómico, tabla de idempotencia, dedupe de webhooks) no se ha ejecutado.
+- **Webhook de Wompi**: sin `WOMPI_PUBLIC_KEY`/`WOMPI_INTEGRITY_SECRET` responde `503`; la deduplicación por
+  `<transacción>:<estado>` está revisada en código pero no probada con eventos reales.
+- **Concurrencia real** de la idempotencia (dos peticiones simultáneas con la misma clave → `409`): se verificó la
+  repetición secuencial, no la carrera.
 - **Login y alta de cliente contra `pintao_clients`** (PBKDF2-SHA256): implementado siguiendo el formato de
   `202608090001_seed_default_admin.sql`, pero sin ejecutar contra una base de datos real. Sólo se verificó el modo
   memoria (alta, sesión, nombre en `/cuenta`, duplicado 409 y nuevo login).
-- **Acciones `cancel`/`restock`** de `/api/admin/orders/[id]`: dependen del RPC `decrement_stock` en Supabase y
-  responden 503 en modo demo (ahora con un mensaje explícito). No están expuestas en la interfaz.
+- **Acciones `cancel`/`restock`** de `/api/admin/orders/[id]`: ya **no** dependen de Supabase (funcionan también en
+  modo memoria) y están cubiertas por `scripts/api-check.mjs` a nivel de API. Siguen **sin estar expuestas en la
+  interfaz** del panel: hoy sólo se pueden invocar por `PATCH` directo.
 - **Revisión visual humana**: el diseño se validó con métricas del DOM (desbordamiento, contraste, visibilidad de
   controles, existencia de secciones), no con un juicio estético. Falta una revisión a ojo.
 - **Rendimiento bajo carga** (Lighthouse/Core Web Vitals): no se ejecutó una medición formal. Lo comprobado es que no

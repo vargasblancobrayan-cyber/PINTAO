@@ -1,5 +1,59 @@
 # Changelog — PINTAO
 
+## [0.3.0] — 2026-10-13 (cierre operativo: stock, idempotencia y webhooks)
+
+La iteración anterior dejó la aplicación funcionando; esta cierra los huecos que sólo aparecen con tráfico real:
+**vender no bajaba el inventario**, un reintento creaba pedidos duplicados y un reintento de Wompi volvía a
+«aprobar» el pago.
+
+### Corregido
+
+- **Vender no descontaba stock.** El RPC atómico `decrement_stock` existía desde `202608290001` pero ningún endpoint
+  lo llamaba (`AUDIT.md` §6.4): se podía vender la misma unidad tantas veces como clientes la pidieran. Ahora
+  `createOrder` descuenta inventario con ese RPC (o sobre el catálogo en memoria sin Supabase) y, si el descuento
+  falla, **borra el pedido ya insertado** para no dejar una venta sin inventario. El rechazo por inventario
+  responde `409` con un mensaje accionable.
+- **Cancelar un pedido volvía a descontar stock.** `PATCH /api/admin/orders/[id]` con `action: "cancel"` llamaba a
+  `decrement_stock` (¡el movimiento inverso!) y además exigía Supabase (503 en demo). Ahora cancela y **repone**
+  inventario con `lib/stock.ts`, funciona con y sin base de datos y es idempotente: cancelar dos veces no devuelve
+  el stock dos veces, y sólo un pedido cancelado puede reponerse (`action: "restock"`).
+- **`refund_stock` (202608300005) nunca reponía nada**: apuntaba a `pintao_store.data -> 'variants'` cuando las
+  variantes viven en `data -> 'products'[i] -> 'variants'`. Se sustituye por `increment_stock`, construida sobre la
+  estructura real.
+- **El `CHECK` de `pintao_payment_attempts.result` no admitía `PENDING`**, que es justo el estado que escribe
+  `createPaymentAttempt()` al crear una transacción de Wompi: cada intento de pago en línea fallaba el `insert` en
+  silencio. Se amplía el `CHECK`.
+- **`pintao_stock_movements` no tenía RLS ni permisos**: la tabla de auditoría de inventario quedaba expuesta/inútil.
+
+### Añadido
+
+- **Idempotencia de endpoints de escritura** (`lib/idempotency.ts`, tabla `pintao_idempotency`):
+  `POST /api/orders` y `POST /api/payments/wompi/create` aceptan `Idempotency-Key`. Repetir la clave devuelve la
+  misma respuesta (el mismo pedido, el mismo enlace de pago) en lugar de duplicar; dos peticiones simultáneas con la
+  misma clave reciben `409`. Sólo se memorizan las respuestas `2xx`, para que un error corregible no quede pegado.
+- **Webhook de Wompi idempotente** (`pintao_webhook_events`): cada evento se registra por `<transacción>:<estado>` y
+  un reintento del proveedor responde `200 { duplicate: true }` sin volver a aplicar el cobro.
+- `lib/stock.ts`: única puerta al inventario (descuento, reposición, siembra de `pintao_store` cuando el catálogo
+  remoto no tiene variantes y registro de movimientos).
+- Migración `202610130001_idempotencia_stock_webhooks.sql` (tablas nuevas, `increment_stock`, permisos y el `CHECK`
+  corregido).
+- `web/scripts/api-check.mjs`: comprobación de API reproducible (**15/15 en verde** sobre el build de producción).
+- El checkout envía `Idempotency-Key` por intento de compra y la reutiliza si el navegador reintenta.
+
+### Verificado
+
+- `npm run typecheck` limpio y `npm run build` correcto (Next 15.5.27).
+- `scripts/api-check.mjs` 15/15: descuento de stock, repetición idempotente (mismo id, sin segundo descuento),
+  rechazo por inventario agotado, cancelación que repone, idempotencia de la cancelación, reponer una cancelación y
+  CSRF. Detalle en `TESTING.md`.
+
+### Limitaciones (sin resolver en esta iteración)
+
+- La migración `202610130001` **no está aplicada**: sin Supabase en el entorno se verificó el modo memoria.
+- El catálogo se sigue sirviendo desde `lib/products.ts`, así que en modo Supabase la ficha puede mostrar stock ya
+  agotado; el pedido se rechaza igualmente al confirmar (el RPC es la autoridad).
+- No hay reintento automático ni emails transaccionales (siguiente iteración).
+
 ## [0.2.0] — 2026-10-12 (auditoría y transformación de `web/`)
 
 ### Corregido (bloqueantes)

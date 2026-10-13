@@ -1,5 +1,20 @@
 # Tasks — PINTAO
 
+## Completado en esta iteración (2026-10-13)
+
+- [x] **Descuento de stock al vender**: `createOrder` llama al RPC atómico `decrement_stock` (y a `increment_stock` al
+      reponer), con compensación del pedido si el inventario no alcanza. `lib/stock.ts` es la única puerta.
+- [x] **Cancelación que repone** en `PATCH /api/admin/orders/[id]` (antes volvía a descontar) e idempotente al repetirla.
+- [x] **Idempotencia** (`Idempotency-Key`) en `POST /api/orders` y `POST /api/payments/wompi/create` con
+      `lib/idempotency.ts` + tabla `pintao_idempotency`; el checkout envía la clave.
+- [x] **Webhook de Wompi idempotente** (`pintao_webhook_events`): un reintento no vuelve a aprobar el cobro.
+- [x] Corregido `refund_stock` (nunca reponía nada) con `increment_stock`, el `CHECK` de `pintao_payment_attempts`
+      (no admitía `PENDING`) y RLS/permisos de `pintao_stock_movements`.
+- [x] `web/scripts/api-check.mjs`: 15/15 comprobaciones de API (stock, idempotencia, cancelación, CSRF) sobre el
+      build de producción.
+- [x] Documentación actualizada (`CHANGELOG.md`, `AUDIT.md` §6.4 y §8, `ARCHITECTURE.md`, `TESTING.md`, `ROADMAP.md`,
+      `DECISIONS.md`).
+
 ## Completado en esta iteración (2026-10-12)
 
 - [x] Auditoría completa de la aplicación `web/` (ver `AUDIT.md`, con evidencias).
@@ -30,14 +45,17 @@
       Para que funcione en el despliegue hay que cargar `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` en Vercel;
       sin ellas el alta responde 503. Ver `AUDIT.md` §6.2 (sin verificación de correo ni reset de contraseña).
 - [ ] **Persistencia del catálogo** en `pintao_store` (el panel de inventario escribe en memoria del proceso).
-- [ ] **Descuento de stock al vender**: decidir trigger vs. llamada explícita al RPC `decrement_stock`.
+- [ ] **Stock visible al cliente en modo Supabase**: el catálogo se sirve desde `lib/products.ts` y puede mostrar
+      stock agotado; conectar `getProductWithLiveStock` a `/tienda` y a la ficha de producto.
+- [ ] Emails transaccionales (pedido recibido, pago aprobado, pedido enviado).
 - [ ] Vitest + Playwright Test (dependencias y CI).
 - [ ] Migración a Next 16 (`npm audit fix --force`): *breaking*, y fijar la versión exacta de Next (hoy el rango
       `^15.3.0` resuelve a 15.5.27).
 
 ## Bloqueado por credenciales
 
-- [ ] `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` en el entorno → ejecutar migraciones y verificar el flujo real.
+- [ ] `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` en el entorno → ejecutar migraciones (incluida la nueva
+      `202610130001_idempotencia_stock_webhooks.sql`) y verificar el flujo real (stock, idempotencia, webhook).
 - [ ] `WOMPI_PUBLIC_KEY` + `WOMPI_INTEGRITY_SECRET` → probar el pago en sandbox y el webhook firmado.
 - [ ] Corregir la inconsistencia de nombres de variables de Wompi entre documentación y código.
 

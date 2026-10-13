@@ -104,13 +104,16 @@ interfaz. Todas las comprobaciones se repitieron después del arreglo: ver `TEST
 3. **Persistencia del catálogo.** Las ediciones del panel de inventario viven en memoria del proceso (se pierden al
    reiniciar). La fuente definitiva es la tabla `pintao_store`; hace falta decidir si el catálogo se sirve desde
    Supabase o si se escribe en la tabla con un RPC.
-4. **Descuento de stock al crear pedidos.** Con Supabase configurado, `createOrder` no llama a `decrement_stock`:
-   las migraciones `202608290001_persistencia_pedidos_stock.sql` definen el RPC pero el código no lo usa, así que el
-   stock no baja al vender. Hay que decidir la estrategia (trigger o llamada explícita) y verificarla con Supabase.
+4. **Descuento de stock al crear pedidos — resuelto (2026-10-13).** Decidido: **llamada explícita al RPC**
+   `decrement_stock` desde `lib/stock.ts`, no trigger. Motivo: el descuento debe poder fallar **antes** de dar la
+   venta por buena, y un trigger no devuelve un error accionable al checkout. Ver §8.
 5. **Credenciales Wompi.** Sin `WOMPI_PUBLIC_KEY` + `WOMPI_INTEGRITY_SECRET` el pago en línea responde 503 y el
    checkout lo informa. La corrección de S1 (no marcar como pagado) **no se ha podido probar de extremo a extremo**.
 
 ## 7. Pendientes conocidos (no corregidos en esta iteración)
+
+> La numeración de este apartado corresponde a la auditoría de 2026-10-12. Los pendientes de la iteración del
+> 2026-10-13 están en §8.
 
 - **Nombres de variables de Wompi inconsistentes** entre la documentación (`WOMPI_SECRET_KEY`,
   `WOMPI_ACCEPTANCE_TOKEN`) y el código (`WOMPI_PUBLIC_KEY`, `WOMPI_INTEGRITY_SECRET`). Documentado en `SECURITY.md`.
@@ -122,3 +125,45 @@ interfaz. Todas las comprobaciones se repitieron después del arreglo: ver `TEST
   reproducibles. La migración a Next 16 (`npm audit fix --force`) sigue pendiente por ser *breaking*.
 - **Sin suite formal** (Vitest/Playwright Test). Ver `TESTING.md`: la verificación es un guion reproducible.
 - **Observabilidad**: sólo `/api/health` y logs. Sin colector de errores.
+
+---
+
+## 8. Iteración 0.3 — cierre operativo (2026-10-13)
+
+Alcance: los huecos que sólo se manifiestan con tráfico real (vender sin descontar inventario, reintentos duplicando
+pedidos y webhooks reprocesados). Verificación: `tsc --noEmit`, `next build` y `scripts/api-check.mjs` (15/15) sobre
+el build de producción en modo demo; **sin credenciales de Supabase ni de Wompi**.
+
+### Hallazgos corregidos
+
+| # | Hallazgo | Evidencia | Estado |
+|---|---|---|---|
+| C1 | **Vender no descontaba stock.** `decrement_stock` existía desde `202608290001` y ningún endpoint lo llamaba: el inventario de `pintao_store` nunca bajaba. | `grep decrement_stock web/src` no devolvía ninguna llamada en el flujo de compra | **Corregido** — `createOrder` descuenta vía `lib/stock.ts`; verificado en memoria: `40 → 37` al vender 3 y rechazo con 0 unidades |
+| C2 | **Cancelar un pedido volvía a descontar stock.** `PATCH /api/admin/orders/[id]` con `action: "cancel"` llamaba a `decrement_stock` (movimiento inverso) y exigía Supabase. | Lectura de la ruta + `AUDIT.md` §6.4 | **Corregido** — cancela y **repone** (`increment_stock` / memoria); idempotente. Verificado: `0 → 2` al cancelar un pedido de 2 unidades |
+| C3 | **`refund_stock` (202608300005) no reponía nada**: operaba sobre `data -> 'variants'` cuando las variantes están en `data -> 'products'[i] -> 'variants'`. | Esquema de `pintao_store` vs. la función | **Corregido** — se sustituye por `increment_stock` (migración `202610130001`) |
+| C4 | **`pintao_payment_attempts.result` no admitía `PENDING`**, el estado que escribe `createPaymentAttempt()` al crear la transacción: el `insert` fallaba en silencio (`createPaymentAttempt` devuelve `false` y nadie lo mira). | `CHECK` de la migración `202608300001` vs. el código | **Corregido** — `CHECK` ampliado en `202610130001` |
+| C5 | **Sin idempotencia**: un F5, un reintento del navegador o un doble clic creaban dos pedidos (y dos transacciones Wompi). | No había ninguna clave de idempotencia en el código ni en el esquema | **Corregido** — `Idempotency-Key` en pedidos y pagos. Verificado: misma clave → mismo `PNT-…` y un solo descuento de stock |
+| C6 | **El webhook de Wompi no recordaba eventos**: el proveedor reintenta hasta 3 veces y cada reintento volvía a aplicar el cobro (`createPaymentAttempt` + `updateOrderPayment`). | Ausencia de tabla/registro de eventos | **Corregido** — `pintao_webhook_events` con clave `<transacción>:<estado>`; un reintento responde `{ duplicate: true }` |
+| C7 | **`pintao_stock_movements` sin RLS ni permisos** (el audit de inventario no era escribible). | Migración `202608300003` sin `enable row level security` | **Corregido** — RLS + `grant` a `service_role` en `202610130001` |
+
+### Decisiones de diseño
+
+- **Stock: llamada explícita, no trigger.** Un trigger no puede devolver al checkout un motivo accionable; con RPC
+  el pedido se rechaza con `409` («otro cliente acaba de comprar las últimas unidades»).
+- **Orden de operaciones: insertar el pedido y luego descontar**, con borrado compensatorio si el descuento falla.
+  Descontar primero perdería inventario ante un fallo del `insert`.
+- **Idempotencia opcional y sólo para `2xx`.** Sin `Idempotency-Key` el comportamiento no cambia; un error no se
+  memoriza para no dejar al cliente pegado a un `400` corregible.
+- **El stock se siembra si falta.** Si `pintao_store` no tiene productos con variantes, `lib/stock.ts` siembra el
+  catálogo y reintenta una vez en lugar de rechazar todas las ventas.
+
+### Limitaciones y no verificado
+
+- **Migración `202610130001` sin aplicar** (no hay credenciales de Supabase en el entorno): la verificación fue en modo
+  memoria. El camino SQL (RPC atómico, `FOR UPDATE`, tabla de idempotencia, dedupe) está revisado en código.
+- **Webhook de Wompi no probado**: sin `WOMPI_*` responde `503`. La deduplicación se verificó por lectura de código,
+  no con eventos reales.
+- **Stock desincronizado con la ficha de producto en modo Supabase**: el catálogo se sirve desde `lib/products.ts`, así
+  que puede mostrar unidades que ya no existen; el pedido se rechaza al confirmar. Conectar
+  `getProductWithLiveStock()` a la tienda queda pendiente (ver `TASKS.md`).
+- **Sin emails transaccionales** y **sin rate-limit distribuido**: el límite sigue en memoria del proceso.`

@@ -28,6 +28,8 @@ web/
 │   ├── db.ts                # Supabase client (server)
 │   ├── server-store.ts      # Memory store for demo
 │   ├── persistence.ts       # Unified data layer (DB + memory)
+│   ├── stock.ts             # Inventory: decrement / release via atomic RPC
+│   ├── idempotency.ts       # `Idempotency-Key` + webhook event dedupe
 │   ├── products.ts          # Product catalogue (22 items)
 │   ├── pricing.ts           # Pricing engine (volume + coupon + shipping)
 │   ├── format.ts            # Currency (COP) and slug helpers
@@ -57,7 +59,13 @@ web/
 2. **Pricing**: `checkout-form.tsx` computes a local preview; `POST /api/orders` recalculates server-side from `products.ts + computePricing` and only trusts it after zod validation.
 3. **Payment**: `POST /api/payments/wompi/create` returns a payment link and leaves the order as `PENDING`; only the
    Wompi webhook, after verifying `X-Event-Checksum`, can move it to `APPROVED`.
-4. **Auth**: session stored as an `HttpOnly` cookie `pintao_session`. Admin validated against `pintao_admin_users`;
+4. **Inventory**: `createOrder` inserts the order and then decrements stock via `lib/stock.ts` (atomic
+   `decrement_stock` RPC, or the in-memory catalogue). If the decrement fails the inserted order is deleted and the
+   client receives `409`.
+5. **Retries**: `POST /api/orders` and `POST /api/payments/wompi/create` accept `Idempotency-Key`; the same key
+   replays the stored response instead of creating another order or Wompi transaction. Wompi webhook events are
+   recorded in `pintao_webhook_events` so a provider retry is acknowledged without re-approving the payment.
+6. **Auth**: session stored as an `HttpOnly` cookie `pintao_session`. Admin validated against `pintao_admin_users`;
    customers against `pintao_clients` (same PBKDF2 format), falling back to the in-memory demo users without
    Supabase.
 
@@ -65,7 +73,12 @@ web/
 
 - **Supabase** is the target for production. All writes go through `lib/persistence.ts`, which falls back to an in-memory store when `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` are absent. The in-memory fallback **actually stores and reads** orders and quotes (it used to accept writes and drop them, leaving `/cuenta` and `/admin` permanently empty).
 - **Admin catalog edits** (`lib/admin-products.ts`) operate on the same array the storefront serves, so changes are visible immediately within the process; persistence beyond a restart requires the `pintao_store` table.
-- Stock is **not** decremented on order creation yet: migrations define the `decrement_stock` RPC but `createOrder` never calls it (pending decision, see `AUDIT.md` §6.4).
+- **Stock is decremented** on order creation and **restored** on cancellation (`lib/stock.ts` → `decrement_stock` /
+  `increment_stock`). Insert-then-decrement with a compensating delete keeps the two sides consistent. The catalogue
+  itself is still served from `lib/products.ts`, so in Supabase mode product pages can show stock that is already
+  gone; the RPC remains the authority at checkout (`AUDIT.md` §8).
+- **Idempotency** lives in `pintao_idempotency` (`key = sha256(scope + Idempotency-Key)`, `status = 0` means in
+  flight). Without Supabase it degrades to a process-level `Map`. Only `2xx` responses are stored.
 - **Migrations** live in `supabase/migrations/` and use only the `service_role` key; the `anon` key is denied on the tables via RLS.
 - **Enum-backed status field**: `status` uses strings (`Pendiente de confirmación`, `Pagado`, `Enviado`, `Completado`, `Cancelado`). It is not `check` constrained in Postgres so legacy data and IDs are more flexible.
 
@@ -107,6 +120,9 @@ response, and skips static assets/images (`_next/static`, `_next/image`, `icon.s
 - Input validation: Zod on `POST /api/orders`; server recomputes totals.
 - Security headers: HSTS, X-Frame-Options, nosniff, Permissions-Policy, Referrer-Policy.
 - Payments: only the signed Wompi webhook can approve an order; creating a transaction leaves it `PENDING`.
+- Idempotency: write endpoints accept `Idempotency-Key`; a repeated key replays the stored `2xx` response and a
+  concurrent one gets `409` (no duplicate orders or charges).
+- Inventory: rejected sales return `409` instead of creating an order without stock.
 
 ## Observability
 
