@@ -30,6 +30,8 @@ web/
 │   ├── persistence.ts       # Unified data layer (DB + memory)
 │   ├── stock.ts             # Inventory: decrement / release via atomic RPC
 │   ├── idempotency.ts       # `Idempotency-Key` + webhook event dedupe
+│   ├── email.ts             # Transactional email transport (Resend via fetch)
+│   ├── order-emails.ts      # Order lifecycle templates (ES) and notifications
 │   ├── products.ts          # Product catalogue (22 items)
 │   ├── pricing.ts           # Pricing engine (volume + coupon + shipping)
 │   ├── format.ts            # Currency (COP) and slug helpers
@@ -65,7 +67,10 @@ web/
 5. **Retries**: `POST /api/orders` and `POST /api/payments/wompi/create` accept `Idempotency-Key`; the same key
    replays the stored response instead of creating another order or Wompi transaction. Wompi webhook events are
    recorded in `pintao_webhook_events` so a provider retry is acknowledged without re-approving the payment.
-6. **Auth**: session stored as an `HttpOnly` cookie `pintao_session`. Admin validated against `pintao_admin_users`;
+6. **Notifications**: order lifecycle emails (received, paid, shipped, cancelled) are sent through `lib/email.ts`
+   (Resend) as best-effort: a failure or a missing `RESEND_API_KEY` never blocks the operation. `GET /api/health`
+   reports whether email/storage/payments are configured.
+7. **Auth**: session stored as an `HttpOnly` cookie `pintao_session`. Admin validated against `pintao_admin_users`;
    customers against `pintao_clients` (same PBKDF2 format), falling back to the in-memory demo users without
    Supabase.
 

@@ -37,6 +37,19 @@ PINTAO_ALLOW_DEMO_LOGIN=true npm start          # o: npm run dev
 node scripts/api-check.mjs                      # PINTAO_BASE para apuntar a otro host
 ```
 
+### Verificación adicional de correo (2026-10-13)
+
+| Comprobación | Resultado |
+|---|---|
+| `GET /api/health` sin `RESEND_API_KEY` | `email: "disabled"` |
+| Pedido con `RESEND_API_KEY` ausente | `201`, aviso `[email] RESEND_API_KEY no configurada: se omite «Recibimos tu pedido #…»` en el log |
+| Pedido con `RESEND_API_KEY` inválida | `201` y `[email] Resend respondió 401: API key is invalid` (4 intentos); la compra no falla |
+| `GET /api/health` con clave presente | `email: "resend"` |
+| `scripts/api-check.mjs` con correo configurado (clave inválida) | 15/15 |
+
+**No verificado:** la entrega real de un correo (requiere `RESEND_API_KEY` válida y un dominio verificado en
+Resend; el dominio de pruebas sólo entrega al correo de la cuenta) y el formato visual en clientes de correo.
+
 ### Resultado de la última ejecución (2026-10-13, build de producción)
 
 | # | Comprobación | Resultado |

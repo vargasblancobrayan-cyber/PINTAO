@@ -64,6 +64,25 @@ El repositorio incluye dos cuentas listas para probar el flujo completo:
   PBKDF2-SHA256 en `pintao_clients` (migración `202610120001_clients_credentials.sql`), así que en el despliegue el
   alta y el login de cliente exigen `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY`; sin ellas el alta responde 503.
 
+## Correo transaccional
+
+El comprador recibe correo en cuatro momentos: **pedido recibido** (al registrar el pedido), **pago confirmado** (sólo
+desde el webhook firmado de Wompi), **pedido enviado** y **pedido cancelado** (desde el panel). La tienda recibe
+además un aviso de cada pedido nuevo.
+
+Proveedor: [Resend](https://resend.com) (`POST https://api.resend.com/emails`, sin dependencias nuevas). Variables:
+
+| Variable | Para qué | Obligatoria |
+|---|---|---|
+| `RESEND_API_KEY` | Enviar. Sin ella el correo se omite y queda un aviso en el log (el checkout nunca falla por correo) | Para enviar |
+| `EMAIL_FROM` | Remitente verificado, p. ej. `"PINTAO <hola@pintao.co>"`. Por defecto el dominio de pruebas de Resend, que **sólo entrega al correo de la cuenta** | No |
+| `ORDER_NOTIFICATION_EMAIL` | Buzón de la tienda para el aviso de pedido nuevo | No |
+| `EMAIL_REPLY_TO` | `reply-to` de los correos salientes (por defecto el WhatsApp/documentación de la marca) | No |
+| `SITE_URL` | Base de los enlaces del correo (por defecto `https://pintao-store.vercel.app`) | No |
+
+`GET /api/health` informa de `email`, `storage` y `payments`, para detectar un despliegue sin claves antes que un
+cliente.
+
 ## Inventario e idempotencia
 
 - **El stock se descuenta al vender** y se repone al cancelar (`lib/stock.ts` → `decrement_stock` / `increment_stock`).

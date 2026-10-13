@@ -145,6 +145,7 @@ el build de producción en modo demo; **sin credenciales de Supabase ni de Wompi
 | C5 | **Sin idempotencia**: un F5, un reintento del navegador o un doble clic creaban dos pedidos (y dos transacciones Wompi). | No había ninguna clave de idempotencia en el código ni en el esquema | **Corregido** — `Idempotency-Key` en pedidos y pagos. Verificado: misma clave → mismo `PNT-…` y un solo descuento de stock |
 | C6 | **El webhook de Wompi no recordaba eventos**: el proveedor reintenta hasta 3 veces y cada reintento volvía a aplicar el cobro (`createPaymentAttempt` + `updateOrderPayment`). | Ausencia de tabla/registro de eventos | **Corregido** — `pintao_webhook_events` con clave `<transacción>:<estado>`; un reintento responde `{ duplicate: true }` |
 | C7 | **`pintao_stock_movements` sin RLS ni permisos** (el audit de inventario no era escribible). | Migración `202608300003` sin `enable row level security` | **Corregido** — RLS + `grant` a `service_role` en `202610130001` |
+| C8 | **La tienda no enviaba ningún correo.** Un comprador pagaba y no recibía ni la confirmación del pedido: es lo primero que espera y multiplica las consultas de soporte. | No existía ningún cliente de correo ni plantilla | **Añadido** — `lib/email.ts` (Resend vía `fetch`) + `lib/order-emails.ts` (pedido recibido, pago confirmado, enviado, cancelado y aviso a la tienda). Sin `RESEND_API_KEY` se omite con aviso en el log; `/api/health` lo reporta |
 
 ### Decisiones de diseño
 
@@ -166,4 +167,7 @@ el build de producción en modo demo; **sin credenciales de Supabase ni de Wompi
 - **Stock desincronizado con la ficha de producto en modo Supabase**: el catálogo se sirve desde `lib/products.ts`, así
   que puede mostrar unidades que ya no existen; el pedido se rechaza al confirmar. Conectar
   `getProductWithLiveStock()` a la tienda queda pendiente (ver `TASKS.md`).
-- **Sin emails transaccionales** y **sin rate-limit distribuido**: el límite sigue en memoria del proceso.`
+- **Sin rate-limit distribuido**: el límite sigue en memoria del proceso (en Vercel, por instancia).
+- **Correos sin entregar de verdad**: el transporte y el manejo de fallos están verificados (401 de Resend, omisión
+  sin clave), pero falta una `RESEND_API_KEY` válida —y un dominio verificado— para comprobar la entrega. No hay
+  reintento ni cola: si el envío falla, sólo queda el aviso en el log.`

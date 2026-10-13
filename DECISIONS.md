@@ -59,6 +59,11 @@
   veces. Antes «cancelar» llamaba a `decrement_stock`, es decir volvía a descontar.
 - **Siembra del catálogo en `pintao_store`** cuando falta o no tiene variantes, antes de rendirse: se prefiere un
   `upsert` ocasional a rechazar todas las ventas por un inventario sin publicar.
+- **Correo con Resend consumido por `fetch`**, no con SDK: una dependencia menos y el mismo patrón que la
+  integración de Wompi. Los envíos son *best-effort* y nunca bloquean la venta; sin `RESEND_API_KEY` se omiten con
+  aviso en el log en lugar de fallar el checkout.
+- **`/api/health` informa del estado de las integraciones** (`storage`, `email`, `payments`): un despliegue sin claves
+  se veía "sano" y fallaba en el checkout con 503.
 - **El stock sí baja al vender, pero la ficha puede mostrar stock viejo** en modo Supabase (el catálogo se sirve
   desde `lib/products.ts`). Se acepta esta iteración: el RPC impide sobrevender; mostrar el stock vivo queda
   pendiente en `TASKS.md`.

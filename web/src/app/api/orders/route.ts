@@ -11,6 +11,7 @@ import { products } from "@/lib/products";
 import { checkRateLimit, clientIp } from "@/lib/rate-limit";
 import { assertSameOrigin } from "@/lib/csrf";
 import { beginIdempotent } from "@/lib/idempotency";
+import { sendOrderReceived } from "@/lib/order-emails";
 
 export const runtime = "nodejs";
 
@@ -153,6 +154,12 @@ return Response.json({ error }, { status });
 
 const created = { id: order.id, order };
 await decision.complete(201, created);
+
+// Correo de «pedido recibido» (best-effort: nunca tumba la compra). Los
+// reintentos idempotentes salen por el camino de `decision.state === "replay"`,
+// así que el comprador no recibe el correo dos veces.
+await sendOrderReceived(order);
+
 return Response.json(created, { status: 201 });
 }
 

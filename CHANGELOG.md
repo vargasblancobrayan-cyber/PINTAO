@@ -37,6 +37,11 @@ La iteración anterior dejó la aplicación funcionando; esta cierra los huecos 
   remoto no tiene variantes y registro de movimientos).
 - Migración `202610130001_idempotencia_stock_webhooks.sql` (tablas nuevas, `increment_stock`, permisos y el `CHECK`
   corregido).
+- **Correos transaccionales** (`lib/email.ts`, `lib/order-emails.ts`): el comprador recibe *pedido recibido*,
+  *pago confirmado* (sólo tras el webhook firmado), *pedido enviado* y *pedido cancelado*, y la tienda un aviso por
+  cada pedido nuevo. Proveedor **Resend** consumido con `fetch` (sin dependencias nuevas); sin `RESEND_API_KEY` el
+  envío se omite y se registra, así que un despliegue sin claves nunca rompe el checkout.
+- `GET /api/health` informa de `storage`, `email` y `payments`: un despliegue sin credenciales ya no se ve "sano".
 - `web/scripts/api-check.mjs`: comprobación de API reproducible (**15/15 en verde** sobre el build de producción).
 - El checkout envía `Idempotency-Key` por intento de compra y la reutiliza si el navegador reintenta.
 
@@ -52,7 +57,10 @@ La iteración anterior dejó la aplicación funcionando; esta cierra los huecos 
 - La migración `202610130001` **no está aplicada**: sin Supabase en el entorno se verificó el modo memoria.
 - El catálogo se sigue sirviendo desde `lib/products.ts`, así que en modo Supabase la ficha puede mostrar stock ya
   agotado; el pedido se rechaza igualmente al confirmar (el RPC es la autoridad).
-- No hay reintento automático ni emails transaccionales (siguiente iteración).
+- Los correos **no se han entregado de verdad**: falta `RESEND_API_KEY`. Sí está verificado que el transporte llama a
+  Resend (con clave inválida respondió 401 y el pedido se registró igual) y que sin clave el envío se omite sin
+  afectar la compra.
+- No hay reintento automático de correos fallidos ni cola de envíos.
 
 ## [0.2.0] — 2026-10-12 (auditoría y transformación de `web/`)
 

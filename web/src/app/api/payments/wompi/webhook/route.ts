@@ -2,6 +2,7 @@
 import { getWompiConfig, verifyWebhookSignature } from "@/lib/wompi";
 import { findOrderById, updateOrderPayment, createPaymentAttempt } from "@/lib/persistence";
 import { markWebhookEvent } from "@/lib/idempotency";
+import { sendPaymentApproved } from "@/lib/order-emails";
 
 export const runtime = "nodejs";
 
@@ -91,6 +92,8 @@ if (!first) return Response.json({ ok: true, duplicate: true });
 // Registrar intento APPROVED en la tabla de intentos
 await createPaymentAttempt(order.id, "APPROVED");
 await updateOrderPayment(order.id, "APPROVED", String(transaction.id));
+// El dedupe de eventos de más arriba garantiza un solo correo por pago.
+await sendPaymentApproved(order);
 } else if (["DECLINED", "VOIDED", "ERROR"].includes(status)) {
 const { first } = await markWebhookEvent(`${String(transaction.id)}:${status}`, {
   source: "wompi",

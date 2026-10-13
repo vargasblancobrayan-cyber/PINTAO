@@ -12,6 +12,10 @@
       (no admitía `PENDING`) y RLS/permisos de `pintao_stock_movements`.
 - [x] `web/scripts/api-check.mjs`: 15/15 comprobaciones de API (stock, idempotencia, cancelación, CSRF) sobre el
       build de producción.
+- [x] **Correos transaccionales** (`lib/email.ts` + `lib/order-emails.ts`): pedido recibido, pago confirmado, pedido
+      enviado y cancelado, con aviso a la tienda del pedido nuevo. Proveedor Resend vía `fetch` (sin dependencias);
+      sin `RESEND_API_KEY` el envío se omite y se registra, sin tumbar el checkout.
+- [x] `GET /api/health` informa de `storage`, `email` y `payments` (detectar despliegues sin claves).
 - [x] Documentación actualizada (`CHANGELOG.md`, `AUDIT.md` §6.4 y §8, `ARCHITECTURE.md`, `TESTING.md`, `ROADMAP.md`,
       `DECISIONS.md`).
 
@@ -47,12 +51,15 @@
 - [ ] **Persistencia del catálogo** en `pintao_store` (el panel de inventario escribe en memoria del proceso).
 - [ ] **Stock visible al cliente en modo Supabase**: el catálogo se sirve desde `lib/products.ts` y puede mostrar
       stock agotado; conectar `getProductWithLiveStock` a `/tienda` y a la ficha de producto.
-- [ ] Emails transaccionales (pedido recibido, pago aprobado, pedido enviado).
 - [ ] Vitest + Playwright Test (dependencias y CI).
 - [ ] Migración a Next 16 (`npm audit fix --force`): *breaking*, y fijar la versión exacta de Next (hoy el rango
       `^15.3.0` resuelve a 15.5.27).
 
 ## Bloqueado por credenciales
+
+- [ ] `RESEND_API_KEY` (y `EMAIL_FROM` con un dominio verificado) en Vercel → verificar un envío real de extremo a
+      extremo. Con la clave ausente el correo se omite; con una inválida, Resend responde 401 y el checkout sigue
+      funcionando (comprobado).
 
 - [ ] `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` en el entorno → ejecutar migraciones (incluida la nueva
       `202610130001_idempotencia_stock_webhooks.sql`) y verificar el flujo real (stock, idempotencia, webhook).

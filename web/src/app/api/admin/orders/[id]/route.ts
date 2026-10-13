@@ -4,6 +4,7 @@ import { SESSION_COOKIE, getSession } from "@/lib/auth";
 import { getDb } from "@/lib/db";
 import { findOrderById, restoreOrderStock, updateOrderStatus } from "@/lib/persistence";
 import { commitStock } from "@/lib/stock";
+import { sendOrderCancelled, sendOrderShipped } from "@/lib/order-emails";
 import { assertSameOrigin } from "@/lib/csrf";
 import type { Order } from "@/lib/types";
 
@@ -98,6 +99,11 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id?: s
     }
     const ok = await updateOrderStatus(id, status);
     if (!ok) return Response.json({ error: "No pudimos actualizar el estado." }, { status: 500 });
+
+    // Avisos al comprador en los dos cambios de estado que le importan.
+    if (status === "Enviado") await sendOrderShipped(order as Order);
+    if (status === "Cancelado") await sendOrderCancelled(order as Order);
+
     return Response.json({ ok: true, status });
   }
 
@@ -122,6 +128,8 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id?: s
 
     const ok = await updateOrderStatus(id, "Cancelado");
     if (!ok) return Response.json({ error: "No pudimos cancelar el pedido." }, { status: 500 });
+
+    await sendOrderCancelled(order as Order);
 
     return Response.json({ ok: true, action: "cancel" });
   }
